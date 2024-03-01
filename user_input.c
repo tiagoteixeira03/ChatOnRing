@@ -117,3 +117,25 @@ void process_user_input(char *regIP, char *regUDP, t_node_info *my_node){
     return;
 
 }
+
+t_node_info* alloc_node_memory(){
+    t_node_info *my_node = (t_node_info*)malloc(1*sizeof(t_node_info));
+
+    my_node->own_IP = (char*)malloc(16*sizeof(char));
+    my_node->succ_IP = (char*)malloc(16*sizeof(char));
+    my_node->sec_suc_IP = (char*)malloc(16*sizeof(char));
+    my_node->pred_IP = (char*)malloc(16*sizeof(char));
+
+    my_node->own_id = (char*)malloc(3*sizeof(char));
+    my_node->succ_id = (char*)malloc(3*sizeof(char));
+    my_node->sec_suc_id = (char*)malloc(3*sizeof(char));
+    my_node->pred_id = (char*)malloc(3*sizeof(char));
+    my_node->ring_id = (char*)malloc(3*sizeof(char));
+
+    my_node->own_port = (char*)malloc(6*sizeof(char));
+    my_node->succ_port = (char*)malloc(6*sizeof(char));
+    my_node->sec_suc_port = (char*)malloc(6*sizeof(char));
+    my_node->pred_port = (char*)malloc(6*sizeof(char));
+
+    return my_node;
+}

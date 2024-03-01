@@ -23,5 +23,6 @@ typedef struct node_info{
 void process_user_input(char *regIP, char *regUDP, t_node_info *my_node);
 char* get_user_input();
 void function_selector(char *buffer, char *regIP, char *regUDP, t_node_info *my_node);
+t_node_info* alloc_node_memory();
 
 #endif

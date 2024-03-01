@@ -15,7 +15,7 @@
 int create_tcp_client_fd(){
     int fd;
 
-    fd=socket(AF_INET,SOCK_STREAM,0); //UDP socket
+    fd=socket(AF_INET,SOCK_STREAM,0); //TCP socket
     if(fd==-1) /*error*/exit(1);
 
     return fd;

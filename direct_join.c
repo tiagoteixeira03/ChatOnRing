@@ -60,7 +60,7 @@ void receive_message(t_node_info *my_node){
     n=read(newfd, buffer,128);
     if(n==-1)/*error*/exit(1);
 
-    sscanf(buffer, "%s", function);
+    sscanf(buffer, "%s", function); //Get only first word from buffer
 
     if(strcmp(function, "ENTRY") == 0){
         if(sscanf(buffer, "%*s %s %s %s", my_node->pred_id, my_node->pred_IP, my_node->pred_port) != 3){
