@@ -36,6 +36,9 @@ int isJoin(char *buffer, t_node_info *my_node){
     result = isFunction("j", "join", buffer); /*0-not join; 1-join abbreviated; 2-join long*/
 
     if((result == 1 || result == 2) && sscanf(buffer, "%*s %s %s", my_node->ring_id, my_node->own_id) == 2){
+        strcpy(my_node->pred_id, my_node->own_id);
+        strcpy(my_node->succ_id, my_node->own_id);
+        strcpy(my_node->sec_suc_id, my_node->own_id); 
         if(atoi(my_node->ring_id)>999){
             printf("Ring id cant excede 3 digits\n");
         }

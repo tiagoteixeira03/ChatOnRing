@@ -30,6 +30,10 @@ void process_user_arguments(int argc, char *argv[], char **regIP, char **regUDP,
     strcpy(my_node->own_port, argv[2]);
     strcpy(my_node->sec_suc_IP, argv[1]);
     strcpy(my_node->sec_suc_port, argv[2]);
+    strcpy(my_node->succ_IP, argv[1]);
+    strcpy(my_node->succ_port, argv[2]);
+    strcpy(my_node->pred_IP, argv[1]);
+    strcpy(my_node->pred_port, argv[2]);
 
     if (argc >= 4){ /*If user defines at least regIP*/
         if(argc == 5 && strlen(argv[3])==15 && strlen(argv[4])==15){ /*If user correctly defines both regIP and regUDP*/
