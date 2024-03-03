@@ -56,7 +56,6 @@ void join(char *regIP, char *regUDP, t_node_info *my_node){
     n=recvfrom(my_node->udp_client_fd,buffer_out,128,0,(struct sockaddr*)&addr,&addrlen);
     if(n==-1) /*error*/ exit(1);
 
-
     if(strncmp(buffer_out, "OKREG", 5) == 0){
         printf("Node %s has been successfully added to ring %s\n\n", my_node->own_id, my_node->ring_id);
     }
