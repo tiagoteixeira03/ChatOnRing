@@ -21,8 +21,8 @@
 int main(int argc, char* argv[]){
     char *regIP, *regUDP;
     int max_fd=0;
-    fd_set current_sockets, ready_sockets;
-    t_node_info* my_node = alloc_node_memory();
+    fd_set ready_sockets;
+    t_node_info* my_node = malloc(1*sizeof(t_node_info));
 
     process_user_arguments(argc, argv, &regIP, &regUDP, my_node);
     write_option_menu();
