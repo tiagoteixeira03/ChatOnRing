@@ -37,7 +37,7 @@ int create_tcp_server_fd(t_node_info *my_node){
         exit(-1);
     }
 
-    listen(fd,5);
+    listen(fd,50);
 
     return fd;
 }

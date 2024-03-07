@@ -14,8 +14,15 @@
 void direct_join(t_node_info *my_node){
     int errcode;
     ssize_t n;
+    fd_set ready_sockets;
     struct addrinfo hints,*res;
-    char buffer_in[128] = "ENTRY ";
+    struct timeval tv;
+    char buffer_in[128] = "ENTRY ", buffer_out[128], *function = NULL;
+
+    tv.tv_sec = 5;
+    tv.tv_usec = 0;
+
+    function = (char*)malloc(8*sizeof(char));
 
     memset(&hints,0,sizeof hints);
 
@@ -38,6 +45,21 @@ void direct_join(t_node_info *my_node){
     n=write(my_node->tcp_client_fd, buffer_in, sizeof(buffer_in));
     if(n==-1)/*error*/exit(1);
 
+    n=read(my_node->tcp_client_fd, buffer_out,128);
+    if(n==-1){
+        perror("Erro read dj\n");
+        /*error*/exit(1);
+    }
+
+    if(strcmp(function, "SUCC") == 0){
+        if(sscanf(buffer_out, "%*s %s %s %s", my_node->sec_suc_id, my_node->sec_suc_IP, my_node->sec_suc_port) != 3){
+            printf("Error joing the node\n");
+        }
+        else{
+            printf("You have a new second succesor\n");
+        }
+    }
+
     strcpy(my_node->pred_id, my_node->succ_id);
     strcpy(my_node->pred_IP, my_node->succ_IP);
     strcpy(my_node->pred_port, my_node->succ_port);
@@ -46,7 +68,7 @@ void direct_join(t_node_info *my_node){
 }
 
 void receive_message(t_node_info *my_node){
-    char buffer[128], *function = NULL;
+    char buffer[128], *function = NULL, buffer_out[128] = "SUCC ";
     int newfd;
     ssize_t n;
     socklen_t addrlen;
@@ -70,7 +92,21 @@ void receive_message(t_node_info *my_node){
             printf("The node %s with ip: %s and port: %s, has joined your ring\n", my_node->pred_id, my_node->pred_IP, my_node->pred_port);
         }
     }
+
     strcpy(my_node->succ_id, my_node->pred_id);
     strcpy(my_node->succ_IP, my_node->pred_IP);
     strcpy(my_node->succ_port, my_node->pred_port);
+
+    strcat(buffer_out, my_node->succ_id);
+    strcat(buffer_out, " ");
+    strcat(buffer_out, my_node->succ_IP);
+    strcat(buffer_out, " ");
+    strcat(buffer_out, my_node->succ_port);
+    strcat(buffer_out, "\n");
+
+    n=write(newfd, buffer_out, sizeof(buffer_out));
+    if(n==-1){
+        perror("Erro direct join\n");
+        /*error*/exit(1);
+    }
 }
