@@ -10,7 +10,7 @@
 
 #include "user_input.h"
 #include "join.h"
-#include "direct_join.h"
+#include "handle_messages.h"
 
 #define BUFFERSIZE 128
 
@@ -24,7 +24,7 @@ int create_udp_client_fd(){
 }
 
 void join(char *regIP, char *regUDP, t_node_info *my_node){
-    int errcode, used_id[BUFFERSIZE], i=0, is_used=0, biggest_id=0;
+    int errcode, used_id[BUFFERSIZE], i=0, is_used=0, biggest_id=0, second_node=0;
     ssize_t n;
     socklen_t addrlen;
     struct sockaddr_in addr;
@@ -81,8 +81,13 @@ void join(char *regIP, char *regUDP, t_node_info *my_node){
         printf("The chosen id is already in use, your new id is %s\n", my_node->own_id);
     }
 
+    sscanf(nodes_list_buffer, "%*s %*s %s %s %s", my_node->succ_id, my_node->succ_IP, my_node->succ_port);
     if(i>1){
-        sscanf(nodes_list_buffer, "%*s %*s %s %s %s", my_node->succ_id, my_node->succ_IP, my_node->succ_port);
+        if(i==3){
+            second_node = 1;
+        }
+        my_node->no_succ = 1;
+        join_node(my_node);
     }
 
     strcat(buffer_in, my_node->ring_id);
@@ -107,9 +112,5 @@ void join(char *regIP, char *regUDP, t_node_info *my_node){
     }
     else{
         printf("There was a problem connecting with the node server\n\n");
-    }
-
-    if(i>1){
-        direct_join(my_node);
     }
 }

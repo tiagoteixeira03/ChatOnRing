@@ -14,10 +14,12 @@ typedef struct node_info{
     char pred_IP[16];
     char pred_port[6];
     char pred_id[3];
-    char ring_id[3];
+    char ring_id[4];
     int tcp_server_fd;
-    int tcp_client_fd;
+    int succ_fd;
+    int pred_fd;
     int udp_client_fd;
+    int no_succ;
 }t_node_info;
 
 

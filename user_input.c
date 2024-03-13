@@ -6,7 +6,7 @@
 #include "user_input.h"
 #include "join.h"
 #include "leave.h"
-#include "direct_join.h"
+#include "handle_messages.h"
 
 #define BUFFERSIZE 128
 
@@ -35,18 +35,20 @@ int isJoin(char *buffer, t_node_info *my_node){
 
     result = isFunction("j", "join", buffer); /*0-not join; 1-join abbreviated; 2-join long*/
 
-    if((result == 1 || result == 2) && sscanf(buffer, "%*s %s %s", my_node->ring_id, my_node->own_id) == 2){
-        strcpy(my_node->pred_id, my_node->own_id);
-        strcpy(my_node->succ_id, my_node->own_id);
-        strcpy(my_node->sec_suc_id, my_node->own_id); 
-        if(atoi(my_node->ring_id)>999){
-            printf("Ring id cant excede 3 digits\n");
-        }
-        else if(atoi(my_node->own_id)>99){
-            printf("Your own id cant excede 2 digits\n");
-        }
-        else{
-            return 1; /*join in abbreviated or long form is correct*/
+    if((result == 1 || result == 2)){
+        if(sscanf(buffer, "%*s %s %s", my_node->ring_id, my_node->own_id) == 2){
+            strcpy(my_node->pred_id, my_node->own_id);
+            strcpy(my_node->succ_id, my_node->own_id);
+            strcpy(my_node->sec_suc_id, my_node->own_id); 
+            if(atoi(my_node->ring_id)>999){
+                printf("Ring id cant excede 3 digits\n");
+            }
+            else if(atoi(my_node->own_id)>99){
+                printf("Your own id cant excede 2 digits\n");
+            }
+            else{
+                return 1; /*join in abbreviated or long form is correct*/
+            }
         }
     }
     return 0; /*join is not correct*/
@@ -148,7 +150,7 @@ void function_selector(char *buffer, char *regIP, char *regUDP, t_node_info *my_
             return;
         }
         else{
-            direct_join(my_node);
+            join_node(my_node);
         }
         strcpy(my_node->sec_suc_id,my_node->own_id);
     }
@@ -157,7 +159,7 @@ void function_selector(char *buffer, char *regIP, char *regUDP, t_node_info *my_
         printf("My id: %s, My IP: %s, My port: %s\n", my_node->own_id, my_node->own_IP, my_node->own_port);
         printf("Sucessor id: %s, Sucessor IP: %s, Sucessor port: %s\n", my_node->succ_id, my_node->succ_IP, my_node->succ_port);
         printf("Second Sucessor id: %s, Second Sucessor IP: %s, Second Sucessor port: %s\n", my_node->sec_suc_id, my_node->sec_suc_IP, my_node->sec_suc_port);
-        printf("Predecessor id: %s, Predecessor IP: %s, Predecessor port: %s\n", my_node->pred_id, my_node->pred_IP, my_node->pred_port);
+        printf("Predecessor id: %s\n", my_node->pred_id);
     }
     else{
         printf("Your input is not an available function\n");
