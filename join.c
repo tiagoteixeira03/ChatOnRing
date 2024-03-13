@@ -10,6 +10,7 @@
 
 #include "user_input.h"
 #include "join.h"
+#include "direct_join.h"
 
 #define BUFFERSIZE 128
 
@@ -28,7 +29,7 @@ void join(char *regIP, char *regUDP, t_node_info *my_node){
     socklen_t addrlen;
     struct sockaddr_in addr;
     struct addrinfo hints, *res;
-    char buffer_in[BUFFERSIZE] = "REG ", buffer_out[BUFFERSIZE], node_info[10] = "NODES ", nodes_list[BUFFERSIZE], *token, id_check[3], new_id_num[2];
+    char buffer_in[BUFFERSIZE] = "REG ", buffer_out[BUFFERSIZE], node_info[10] = "NODES ", nodes_list[BUFFERSIZE], *token, id_check[3], new_id_num[2], nodes_list_buffer[BUFFERSIZE];
 
     memset(&hints,0,sizeof hints);
 
@@ -48,6 +49,8 @@ void join(char *regIP, char *regUDP, t_node_info *my_node){
     addrlen=sizeof(addr);
     n=recvfrom(my_node->udp_client_fd, nodes_list, 128, 0, (struct sockaddr*)&addr, &addrlen);
     if(n==-1) /*error*/ exit(1);
+
+    strcpy(nodes_list_buffer, nodes_list);
 
     token = strtok(nodes_list, "\n");
     while(token != NULL){
@@ -78,6 +81,10 @@ void join(char *regIP, char *regUDP, t_node_info *my_node){
         printf("The chosen id is already in use, your new id is %s\n", my_node->own_id);
     }
 
+    if(i>1){
+        sscanf(nodes_list_buffer, "%*s %*s %s %s %s", my_node->succ_id, my_node->succ_IP, my_node->succ_port);
+    }
+
     strcat(buffer_in, my_node->ring_id);
     strcat(buffer_in, " ");
     strcat(buffer_in, my_node->own_id);
@@ -100,5 +107,9 @@ void join(char *regIP, char *regUDP, t_node_info *my_node){
     }
     else{
         printf("There was a problem connecting with the node server\n\n");
+    }
+
+    if(i>1){
+        direct_join(my_node);
     }
 }

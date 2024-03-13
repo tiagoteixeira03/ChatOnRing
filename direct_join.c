@@ -14,13 +14,8 @@
 void direct_join(t_node_info *my_node){
     int errcode;
     ssize_t n;
-    fd_set ready_sockets;
     struct addrinfo hints,*res;
-    struct timeval tv;
     char buffer_in[128] = "ENTRY ", buffer_out[128], *function = NULL;
-
-    tv.tv_sec = 5;
-    tv.tv_usec = 0;
 
     function = (char*)malloc(8*sizeof(char));
 
