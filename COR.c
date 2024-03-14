@@ -19,12 +19,14 @@
 #define MAX(X, Y) (((X) > (Y)) ? (X) : (Y))
 
 int main(int argc, char* argv[]){
-    char *regIP, *regUDP;
+    char *regIP, *regUDP, buffer[128];
     int max_fd=0;
     fd_set ready_sockets;
     t_node_info* my_node = malloc(1*sizeof(t_node_info));
+    ssize_t n;
 
     my_node->succ_fd=0;
+    my_node->node_just_left=0;
 
     process_user_arguments(argc, argv, &regIP, &regUDP, my_node);
     write_option_menu();
@@ -39,12 +41,14 @@ int main(int argc, char* argv[]){
     printf("Please type out a function with the formatting shown above\n\n");
 
     while(1){
-        max_fd =MAX(max_fd, my_node->succ_fd);
+        max_fd = MAX(max_fd, my_node->succ_fd);
+        max_fd = MAX(max_fd, my_node->pred_fd);
         FD_ZERO(&ready_sockets); /*Remove all descriptors*/
         FD_SET(0, &ready_sockets); /*add descriptor 0 (stdin)*/
         FD_SET(my_node->udp_client_fd, &ready_sockets); /*add descriptor udp_client_fd*/
         FD_SET(my_node->tcp_server_fd, &ready_sockets); /*add descriptor tcp_server_fd*/
         FD_SET(my_node->succ_fd, &ready_sockets); /*add descriptor succ_fd*/
+        FD_SET(my_node->pred_fd, &ready_sockets); /*add descriptor pred_fd*/
 
         if(select(max_fd+1, &ready_sockets, NULL, NULL, NULL) < 0){
             perror("select error");
@@ -57,11 +61,23 @@ int main(int argc, char* argv[]){
         if(FD_ISSET(my_node->tcp_server_fd, &ready_sockets)){//message from a new node
             receive_message(my_node);
             printf("Please type out a function with the formatting shown above\n\n");
+            continue;
         }
         if(my_node->succ_fd>0){
             if(FD_ISSET(my_node->succ_fd, &ready_sockets)){//message from the successor
                 receive_from_succ(my_node);
                 printf("Please type out a function with the formatting shown above\n\n");
+                continue;
+            }
+        }
+        if(my_node->pred_fd>0){
+            if(FD_ISSET(my_node->pred_fd, &ready_sockets)){//message from the successor(In this case its when it closes)
+                n = read(my_node->pred_fd, buffer, sizeof(buffer));
+                if(n==0){
+                    my_node->node_just_left=1;
+                    close(my_node->pred_fd);
+                    my_node->pred_fd=0;
+                }
             }
         }
     }

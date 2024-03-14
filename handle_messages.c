@@ -130,6 +130,12 @@ void receive_from_succ(t_node_info *my_node){
     n=read(my_node->succ_fd, buffer,128);
     if(n==-1)/*error*/exit(1);
 
+    if(n == 0){
+        close(my_node->succ_fd);
+        node_left(my_node);
+        return;
+    }
+
     sscanf(buffer, "%s", function); //Get only first word from buffer
 
     if(strncmp(function, "SUCC", 5)==0){
@@ -207,7 +213,7 @@ void warn_sec_succ(t_node_info *my_node){
 }
 
 void receive_message(t_node_info *my_node){
-    char buffer[128], *function = NULL, buffer_out[128] = "SUCC ";
+    char buffer[128], *function = NULL;
     int newfd;
     ssize_t n;
     socklen_t addrlen;
@@ -234,8 +240,7 @@ void receive_message(t_node_info *my_node){
 }
 
 void new_pred(t_node_info *my_node, int newfd, char buffer[128]){
-    char *function = NULL, buffer_out[128] = "SUCC ";
-    ssize_t n;
+    char buffer_out[128] = "SUCC ";
 
     if(sscanf(buffer, "%*s %s", my_node->pred_id) != 1){
         printf("An atempt at joing your ring chat was made but it failed due to bad formatting\n");
@@ -243,5 +248,75 @@ void new_pred(t_node_info *my_node, int newfd, char buffer[128]){
     else{
         printf("The node %s has joined your ring\n", my_node->pred_id);
         my_node->pred_fd = newfd;
-    }  
+    }
+
+    if(my_node->node_just_left == 1){
+        ssize_t n;
+
+        strcat(buffer_out, my_node->succ_id);
+        strcat(buffer_out, " ");
+        strcat(buffer_out, my_node->succ_IP);
+        strcat(buffer_out, " ");
+        strcat(buffer_out, my_node->succ_port);
+        strcat(buffer_out, "\n");
+
+        n=write(my_node->pred_fd, buffer_out, sizeof(buffer_out));
+        if(n==-1)/*error*/exit(1);
+
+        my_node->node_just_left = 0;
+    }
+}
+
+void receive_from_pred(t_node_info *my_node){
+    char buffer[128];
+    ssize_t n;
+
+    n=read(my_node->succ_fd, buffer,128);
+    if(n==-1)/*error*/exit(1);
+
+    if(n==0){/*Connection closed*/
+        close(my_node->pred_fd);
+    }
+
+    return;
+}
+
+void node_left(t_node_info *my_node){
+    int errcode;
+    ssize_t n;
+    struct addrinfo hints,*res;
+    char buffer_pred[128] = "PRED ", buffer_succ[128] = "SUCC ";
+
+    my_node->succ_fd = create_tcp_client_fd();
+
+    memset(&hints,0,sizeof hints);
+
+    hints.ai_family=AF_INET; //IPv4
+    hints.ai_socktype=SOCK_STREAM; //TCP socket
+
+    errcode=getaddrinfo(my_node->sec_suc_IP, my_node->sec_suc_port, &hints, &res);
+    if(errcode!=0)/*error*/exit(1);
+
+    n=connect(my_node->succ_fd,res->ai_addr,res->ai_addrlen);
+    if(n==-1)/*error*/exit(1);
+
+    strcpy(my_node->succ_id, my_node->sec_suc_id);
+    strcpy(my_node->succ_IP, my_node->sec_suc_IP);
+    strcpy(my_node->succ_port, my_node->sec_suc_port);
+
+    strcat(buffer_pred, my_node->own_id);
+    strcat(buffer_pred, "\n");
+
+    n=write(my_node->succ_fd, buffer_pred, sizeof(buffer_pred));
+    if(n==-1)/*error*/exit(1);
+
+    strcat(buffer_succ, my_node->sec_suc_id);
+    strcat(buffer_succ, " ");
+    strcat(buffer_succ, my_node->sec_suc_IP);
+    strcat(buffer_succ, " ");
+    strcat(buffer_succ, my_node->sec_suc_port);
+    strcat(buffer_succ, "\n");
+
+    n=write(my_node->pred_fd, buffer_succ, sizeof(buffer_succ));
+    if(n==-1)/*error*/exit(1);
 }

@@ -24,7 +24,7 @@ int create_udp_client_fd(){
 }
 
 void join(char *regIP, char *regUDP, t_node_info *my_node){
-    int errcode, used_id[BUFFERSIZE], i=0, is_used=0, biggest_id=0, second_node=0;
+    int errcode, used_id[BUFFERSIZE], i=0, is_used=0, biggest_id=0;
     ssize_t n;
     socklen_t addrlen;
     struct sockaddr_in addr;
@@ -83,10 +83,6 @@ void join(char *regIP, char *regUDP, t_node_info *my_node){
 
     sscanf(nodes_list_buffer, "%*s %*s %s %s %s", my_node->succ_id, my_node->succ_IP, my_node->succ_port);
     if(i>1){
-        if(i==3){
-            second_node = 1;
-        }
-        my_node->no_succ = 1;
         join_node(my_node);
     }
 

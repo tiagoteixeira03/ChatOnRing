@@ -50,5 +50,11 @@ void leave(char *regIP, char *regUDP, t_node_info *my_node){
     else{
         printf("There was a problem connecting with the node server\n\n");
     }
+
+    close(my_node->pred_fd);
+    my_node->pred_fd=0;
+    close(my_node->succ_fd);
+    my_node->succ_fd=0;
+
     return;
 }

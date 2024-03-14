@@ -19,7 +19,7 @@ typedef struct node_info{
     int succ_fd;
     int pred_fd;
     int udp_client_fd;
-    int no_succ;
+    int node_just_left;
 }t_node_info;
 
 

@@ -12,5 +12,9 @@ void warn_pred(t_node_info *my_node);
 void warn_sec_succ(t_node_info *my_node);
 void receive_message(t_node_info *my_node);
 void new_pred(t_node_info *my_node, int newfd, char buffer[128]);
+void receive_from_pred(t_node_info *my_node);
+void node_left(t_node_info *my_node);
+void wait_pred(t_node_info *my_node);
+
 
 #endif
