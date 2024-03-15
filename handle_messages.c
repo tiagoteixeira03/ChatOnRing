@@ -13,6 +13,7 @@
 #include "user_input.h"
 #include "handle_messages.h"
 #include "tcp_client.h"
+#include "routing_layer.h"
 
 void join_node(t_node_info *my_node){
     char buffer_in[128] = "ENTRY ", buffer_out[128], *function;
@@ -42,7 +43,7 @@ void join_node(t_node_info *my_node){
     strcat(buffer_in, my_node->own_port);
     strcat(buffer_in, "\n");
 
-    n=write(my_node->succ_fd, buffer_in, sizeof(buffer_in));
+    n=write(my_node->succ_fd, buffer_in, sizeof(buffer_in)); //"ENTRY i i.IP i.TCP"
     if(n==-1)/*error*/exit(1);
  
     n=read(my_node->succ_fd, buffer_out,128);
@@ -58,7 +59,7 @@ void join_node(t_node_info *my_node){
             printf("You have a new second succesor\n");
         }
     }
-    if(strcmp(my_node->sec_suc_id, my_node->own_id)==0){
+    if(strcmp(my_node->sec_suc_id, my_node->own_id)==0){ //There's only one more node besides me in this ring
         strcpy(my_node->pred_id, my_node->succ_id);
         strcpy(my_node->pred_IP, my_node->succ_IP);
         strcpy(my_node->pred_port, my_node->succ_port);
@@ -74,7 +75,7 @@ void joining_node(t_node_info *my_node, int newfd, char buffer[128]){
     if(strcmp(my_node->pred_id, my_node->own_id)==0 && strcmp(my_node->succ_id, my_node->own_id)==0 ){
         my_node->succ_fd = newfd;
 
-        second_node = 1;
+        second_node = 1; //I was alone in the ring and a second_node is joining me
     }
 
     if(sscanf(buffer, "%*s %s %s %s", my_node->pred_id, my_node->pred_IP, my_node->pred_port) != 3){
@@ -84,7 +85,7 @@ void joining_node(t_node_info *my_node, int newfd, char buffer[128]){
         printf("The node %s with ip: %s and port: %s, has joined your ring\n", my_node->pred_id, my_node->pred_IP, my_node->pred_port);
     }  
 
-    if(second_node==1){
+    if(second_node==1){ /*If im alone and a second node joins as my predecessor, my successor will also be this new node*/
         strcpy(my_node->succ_IP, my_node->pred_IP);
         strcpy(my_node->succ_id, my_node->pred_id);
         strcpy(my_node->succ_port, my_node->pred_port);
@@ -100,7 +101,7 @@ void joining_node(t_node_info *my_node, int newfd, char buffer[128]){
     n=write(newfd, buffer_out, sizeof(buffer_out));
     if(n==-1)/*error*/exit(1);
     
-    if(second_node!=1){
+    if(second_node!=1){ /*If I wasn't alone before this new node joined*/
         update_sucessor(my_node);
     }
     my_node->pred_fd = newfd;
@@ -117,7 +118,7 @@ void update_sucessor(t_node_info *my_node){
     strcat(buffer_in, my_node->pred_port);
     strcat(buffer_in, "\n");
 
-    n=write(my_node->pred_fd, buffer_in, sizeof(buffer_in));
+    n=write(my_node->pred_fd, buffer_in, sizeof(buffer_in)); //"ENTRY i i.IP i.TCP" is sent to my old predecessor before the new node joined
     if(n==-1)/*error*/exit(1);
 }
 
@@ -139,9 +140,9 @@ void receive_from_succ(t_node_info *my_node){
     sscanf(buffer, "%s", function); //Get only first word from buffer
 
     if(strncmp(function, "SUCC", 5)==0){
-        new_sec_succ(my_node, buffer);
+        new_sec_succ(my_node, buffer); /*If I receive a SUCC from my SUCC means that my sucessor is informing me of my SEC Succ*/
     }
-    else if(strncmp(function, "ENTRY", 5)==0){
+    else if(strncmp(function, "ENTRY", 5)==0){ /*If I receive a ENTRY from my SUCC means that im being informed that my SUCC and SEC SUCC are going to change*/
         new_succ(my_node, buffer);
     }
 }
@@ -234,6 +235,7 @@ void receive_message(t_node_info *my_node){
     }
     else if(strncmp(function, "PRED", 5)==0){
         new_pred(my_node, newfd, buffer);
+        routing_table_init(my_node);
     }
 
     return;

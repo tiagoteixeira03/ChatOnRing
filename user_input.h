@@ -2,6 +2,9 @@
 #define user_input_h
 
 typedef struct node_info{
+    char routing_table[100][100][256]; /*0<NODE_ID<99 and assuming paths with length < 256 characters*/
+    char shortest_paths_table[100][256]; 
+    char forwarding_table[100][5];
     char own_IP[16];
     char own_port[6];
     char own_id[3];
