@@ -15,15 +15,17 @@
 #include "tcp_client.h"
 #include "tcp_server.h"
 #include "handle_messages.h"
+#include "routing_layer.h"
 
 #define MAX(X, Y) (((X) > (Y)) ? (X) : (Y))
 
 int main(int argc, char* argv[]){
-    char *regIP, *regUDP, buffer[128];
+    char *regIP, *regUDP;
     int max_fd=0;
     fd_set ready_sockets;
     t_node_info* my_node = malloc(1*sizeof(t_node_info));
-    ssize_t n;
+
+    reset_tables(my_node);
 
     my_node->succ_fd=0;
     my_node->node_just_left=0;
@@ -72,12 +74,9 @@ int main(int argc, char* argv[]){
         }
         if(my_node->pred_fd>0){
             if(FD_ISSET(my_node->pred_fd, &ready_sockets)){//message from the successor(In this case its when it closes)
-                n = read(my_node->pred_fd, buffer, sizeof(buffer));
-                if(n==0){
-                    my_node->node_just_left=1;
-                    close(my_node->pred_fd);
-                    my_node->pred_fd=0;
-                }
+                receive_from_pred(my_node);
+                printf("Please type out a function with the formatting shown above\n\n");
+                continue;
             }
         }
     }

@@ -105,6 +105,10 @@ void joining_node(t_node_info *my_node, int newfd, char buffer[128]){
         update_sucessor(my_node);
     }
     my_node->pred_fd = newfd;
+    
+    if(second_node==1){
+        routing_table_init(my_node);
+    }
 }
 
 void update_sucessor(t_node_info *my_node){
@@ -123,12 +127,12 @@ void update_sucessor(t_node_info *my_node){
 }
 
 void receive_from_succ(t_node_info *my_node){
-    char buffer[128], *function;
+    char buffer[512], *function;
     ssize_t n;
 
     function = (char*)malloc(6*sizeof(char));
 
-    n=read(my_node->succ_fd, buffer,128);
+    n=read(my_node->succ_fd, buffer, 512);
     if(n==-1)/*error*/exit(1);
 
     if(n == 0){
@@ -142,8 +146,34 @@ void receive_from_succ(t_node_info *my_node){
     if(strncmp(function, "SUCC", 5)==0){
         new_sec_succ(my_node, buffer); /*If I receive a SUCC from my SUCC means that my sucessor is informing me of my SEC Succ*/
     }
-    else if(strncmp(function, "ENTRY", 5)==0){ /*If I receive a ENTRY from my SUCC means that im being informed that my SUCC and SEC SUCC are going to change*/
+    else if(strncmp(function, "ENTRY", 6)==0){ /*If I receive a ENTRY from my SUCC means that im being informed that my SUCC and SEC SUCC are going to change*/
         new_succ(my_node, buffer);
+    }
+    else if(strncmp(function, "ROUTE", 6)==0){
+        process_route_messages(my_node, buffer);
+    }
+}
+
+void receive_from_pred(t_node_info *my_node){
+    char buffer[512], *function;
+    ssize_t n;
+
+    function = (char*)malloc(6*sizeof(char));
+
+    n=read(my_node->pred_fd, buffer, 512);
+    if(n==-1)/*error*/exit(1);
+
+    if(n==0){
+        my_node->node_just_left=1;
+        close(my_node->pred_fd);
+        my_node->pred_fd=0;
+        return;
+    }
+
+    sscanf(buffer, "%s", function); //Get only first word from buffer
+
+    if(strncmp(function, "ROUTE", 6)==0){
+        process_route_messages(my_node, buffer);
     }
 }
 
@@ -267,20 +297,6 @@ void new_pred(t_node_info *my_node, int newfd, char buffer[128]){
 
         my_node->node_just_left = 0;
     }
-}
-
-void receive_from_pred(t_node_info *my_node){
-    char buffer[128];
-    ssize_t n;
-
-    n=read(my_node->succ_fd, buffer,128);
-    if(n==-1)/*error*/exit(1);
-
-    if(n==0){/*Connection closed*/
-        close(my_node->pred_fd);
-    }
-
-    return;
 }
 
 void node_left(t_node_info *my_node){
