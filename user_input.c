@@ -7,6 +7,7 @@
 #include "join.h"
 #include "leave.h"
 #include "handle_messages.h"
+#include "routing_layer.h"
 
 #define BUFFERSIZE 128
 
@@ -107,19 +108,64 @@ int isDirectjoin(char *buffer, t_node_info *my_node){
          || (result == 2 && sscanf(buffer, "%*s %*s %s %s %s %s", my_node->own_id, my_node->succ_id, my_node->succ_IP, my_node->succ_port) == 4)){
             if(strlen(my_node->own_id) != 2){
                 printf("%s is not a permitted id\n", my_node->own_id);
+                exit(1);
             }
             else if(strlen(my_node->succ_id) != 2){
                 printf("%s is not a permitted id\n", my_node->succ_id);
+                exit(1);
             }
             else if(strlen(my_node->succ_IP) != 9 && strlen(my_node->succ_IP) != 13){
                 printf("%s is not a permitted ip\n", my_node->succ_IP);
+                exit(1);
             }
             else if(strlen(my_node->succ_port) != 5){
                 printf("%s is not a permitted port\n", my_node->succ_port);
+                exit(1);
             }
             return 1; /*Direct join is correct*/
         }
         return 0; /*Direct join is not correct*/
+}
+
+char *isShowRouting(char *buffer){
+    int result;
+    char *dest = (char*)malloc(3*sizeof(char));
+
+    result = isFunction("sr", "show routing", buffer);
+
+    if((result == 1 && sscanf(buffer, "%*s %s", dest)) || (result==2 && scanf(buffer, "%*s %*s %s", dest))){
+        return dest;
+    }
+    else{
+        return "error";
+    }
+}
+
+char *isShowPath(char *buffer){
+    int result;
+    char *dest = (char*)malloc(3*sizeof(char));
+
+    result = isFunction("sp", "show path", buffer);
+
+    if((result == 1 && sscanf(buffer, "%*s %s", dest)) || (result==2 && scanf(buffer, "%*s %*s %s", dest))){
+        return dest;
+    }
+    else{
+        return "error";
+    }
+}
+
+int isShowForwarding(char *buffer){
+    int result;
+
+    result = isFunction("sf", "show forwarding", buffer);
+
+    if(result == 1  || result == 2){
+        return 1; /*Show Forwarding Form is correct*/
+    }
+    else{
+        return 0;
+    }
 }
 
 void function_selector(char *buffer, char *regIP, char *regUDP, t_node_info *my_node){
@@ -160,6 +206,26 @@ void function_selector(char *buffer, char *regIP, char *regUDP, t_node_info *my_
         printf("Sucessor id: %s, Sucessor IP: %s, Sucessor port: %s\n", my_node->succ_id, my_node->succ_IP, my_node->succ_port);
         printf("Second Sucessor id: %s, Second Sucessor IP: %s, Second Sucessor port: %s\n", my_node->sec_suc_id, my_node->sec_suc_IP, my_node->sec_suc_port);
         printf("Predecessor id: %s\n", my_node->pred_id);
+    }
+    else if(strcmp(isShowRouting(buffer), "error") != 0){
+        if(strlen(isShowRouting(buffer))!=2 && strcmp(isShowRouting(buffer), "all")!=0){
+            printf("%s is not a valid destination id\n", isShowRouting(buffer));
+            return;
+        }
+        else{
+            print_routing_table(my_node, isShowRouting(buffer));
+        }
+    }
+    else if(strcmp(isShowPath(buffer), "error") != 0){
+        if(strlen(isShowPath(buffer))!=2 && strcmp(isShowPath(buffer), "all")!=0){
+            printf("%s is not a valid destination id\n", isShowPath(buffer));
+        }
+        else{
+            print_shortest_path(my_node, isShowPath(buffer));
+        }
+    }
+    else if(isShowForwarding(buffer)){
+        //print forwarding table
     }
     else{
         printf("Your input is not an available function\n");

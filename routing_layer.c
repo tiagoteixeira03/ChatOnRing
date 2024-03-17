@@ -11,18 +11,44 @@
 
 #include "routing_layer.h"
 
-void print_routing_table(t_node_info *my_node){
-    for(int i=0; i<5; i++){
-        for(int j=0; j<5; j++){
-            printf("%s |", my_node->routing_table[i][j]);
+void print_routing_table(t_node_info *my_node, char dest[3]){
+    // Print table neighbours
+    printf("| %-10s | %-10s | %-10s |\n", " ", my_node->succ_id, my_node->pred_id);
+    
+    // Print divider
+    printf("|------------|------------|------------|\n");
+    
+    if(strcmp(dest, "all")!=0){ //If user selects a single destination
+        // Print table row
+        printf("| %-10s | %-10s | %-10s |\n", dest, my_node->routing_table[atoi(dest)][atoi(my_node->succ_id)], my_node->routing_table[atoi(dest)][atoi(my_node->pred_id)]);
+    }
+    else{
+        for(int i=0; i<100; i++){
+            if(strcmp(my_node->routing_table[i][atoi(my_node->succ_id)], "-") != 0 || strcmp(my_node->routing_table[atoi(dest)][atoi(my_node->pred_id)], "-") != 0){
+                // Print table row
+                printf("| %-10d | %-10s | %-10s |\n", i, my_node->routing_table[i][atoi(my_node->succ_id)], my_node->routing_table[i][atoi(my_node->pred_id)]);
+            }
         }
-        printf("\n");
     }
 }
 
-void print_shortest_paths_table(t_node_info *my_node){
-    for(int i=0; i<5; i++){
-        printf("%s\n", my_node->shortest_paths_table[i]);
+void print_shortest_path(t_node_info *my_node, char dest[3]){
+    printf("| %-10s | %-10s |\n", "Destination", "Path");
+    
+    // Print divider
+    printf("|------------|------------|\n");
+    
+    if(strcmp(dest, "all")!=0){ //If user selects a single destination        
+        // Print table row
+        printf("| %-10s | %-10s |\n", dest, my_node->shortest_paths_table[atoi(dest)]);
+    }
+    else{
+        for(int i=0; i<100; i++){
+            if(strcmp(my_node->shortest_paths_table[i], "-")!=0){ //If there is a path
+                // Print table row
+                printf("| %-10d | %-10s |\n", i, my_node->shortest_paths_table[i]);
+            } 
+        }
     }
 }
 
@@ -172,9 +198,5 @@ void process_route_messages(t_node_info *my_node, char buffer[512]){
     }
     if(routing_to_shortest_paths_table(my_node)){ /*If shortest paths table changed*/
         write_route_messages(my_node); //Send my new table to my neighbours
-    }
-    else{
-        print_routing_table(my_node);
-        print_shortest_paths_table(my_node);
     }
 }

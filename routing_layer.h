@@ -3,8 +3,8 @@
 
 #include "user_input.h"
 
-void print_routing_table(t_node_info *my_node);
-void print_shortest_paths_table(t_node_info *my_node);
+void print_routing_table(t_node_info *my_node, char dest[3]);
+void print_shortest_path(t_node_info *my_node, char dest[3]);
 void reset_tables(t_node_info *my_node);
 int routing_to_shortest_paths_table(t_node_info *my_node);
 void routing_table_init(t_node_info *my_node);
