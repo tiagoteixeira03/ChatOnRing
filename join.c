@@ -7,12 +7,36 @@
 #include <arpa/inet.h>
 #include <netdb.h>
 #include <stdio.h>
+#include <stdbool.h>
+#include <time.h>
 
 #include "user_input.h"
 #include "join.h"
 #include "handle_messages.h"
+#include "routing_layer.h"
 
 #define BUFFERSIZE 128
+
+bool isIdUsed(int id, int* used_ids, int n) {
+    for (int i = 0; i < n; ++i) {
+        if (used_ids[i] == id) {
+            return true;
+        }
+    }
+    return false;
+}
+
+int generateNewId(int* used_ids, int n) {
+    int new_id;
+    srand(time(NULL)); // Seed for random number generation
+
+    // Generate random ids until finding one not used
+    do {
+        new_id = rand() % 99 + 1; // Generate random id between 1 and 99
+    } while (isIdUsed(new_id, used_ids, n));
+
+    return new_id;
+}
 
 int create_udp_client_fd(){
     int fd;
@@ -24,12 +48,12 @@ int create_udp_client_fd(){
 }
 
 void join(char *regIP, char *regUDP, t_node_info *my_node){
-    int errcode, used_id[BUFFERSIZE], i=0, is_used=0, biggest_id=0;
+    int errcode, used_ids[100], nodeslist_lines=0;
     ssize_t n;
     socklen_t addrlen;
     struct sockaddr_in addr;
     struct addrinfo hints, *res;
-    char buffer_in[BUFFERSIZE] = "REG ", buffer_out[BUFFERSIZE], node_info[10] = "NODES ", nodes_list[BUFFERSIZE], *token, id_check[3], new_id_num[2], nodes_list_buffer[BUFFERSIZE];
+    char buffer_in[BUFFERSIZE] = "REG ", buffer_out[BUFFERSIZE], node_info[10] = "NODES ", nodes_list[BUFFERSIZE], *token, id_check[16], nodes_list_buffer[BUFFERSIZE];
 
     memset(&hints,0,sizeof hints);
 
@@ -52,37 +76,32 @@ void join(char *regIP, char *regUDP, t_node_info *my_node){
 
     strcpy(nodes_list_buffer, nodes_list);
 
+
     token = strtok(nodes_list, "\n");
     while(token != NULL){
         sscanf(token, "%s", id_check);
-        if(strcmp(id_check, my_node->own_id)==0){
-            is_used = 1;
+        if(strcmp(id_check, "NODESLIST")==0){
+            nodeslist_lines++;
+            token = strtok(NULL, "\n");
+            continue;
         }
-        used_id[i] = atoi(id_check);
-        if(used_id[i] > biggest_id){
-            biggest_id = used_id[i];
-        }
-        i++;
+        used_ids[nodeslist_lines]=atoi(id_check);
+        nodeslist_lines++;
         token = strtok(NULL, "\n");
     }
 
-    char *new_id = (char*)malloc(3*sizeof(char));
+    if(isIdUsed(atoi(my_node->own_id), used_ids, nodeslist_lines)){
+        printf("The ID %s is already used\n", my_node->own_id);
 
-    if(is_used == 1){
-        sprintf(new_id_num, "%d", biggest_id+1);
-        if(strlen(new_id_num)<2){
-            strcat(new_id, "0");
-            strcat(new_id, new_id_num);
-            strcpy(my_node->own_id, new_id);
-        }
-        else{
-            strcpy(new_id, new_id_num);
-        }
-        printf("The chosen id is already in use, your new id is %s\n", my_node->own_id);
+        int new_id = generateNewId(used_ids, nodeslist_lines);
+
+        strcpy(my_node->own_id, convert_single_digit_numbers(new_id));
+
+        printf("Your new ID is %s\n", my_node->own_id);
     }
 
     sscanf(nodes_list_buffer, "%*s %*s %s %s %s", my_node->succ_id, my_node->succ_IP, my_node->succ_port);
-    if(i>1){
+    if(nodeslist_lines>1){
         join_node(my_node);
     }
 
