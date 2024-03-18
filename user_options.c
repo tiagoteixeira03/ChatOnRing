@@ -49,7 +49,7 @@ void process_user_arguments(int argc, char *argv[], char **regIP, char **regUDP,
         }
     }
     else{ /*If user doesn't define neither regIP nor regUDP*/
-        strcpy(*regIP, "192.168.1.1");//192.168.1.1
+        strcpy(*regIP, "tejo.tecnico.ulisboa.pt");//192.168.1.1
         strcpy(*regUDP, "59000");
     }
 
