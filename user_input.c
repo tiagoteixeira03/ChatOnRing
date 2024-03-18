@@ -178,10 +178,12 @@ void function_selector(char *buffer, char *regIP, char *regUDP, t_node_info *my_
     else if(isLeave(buffer)){
         if(on_node == 0){
             printf("You aren't currently connected to a node, use the command join to do so\n");
+            printf("Please type out a function with the formatting shown above\n\n");
         }
         else{
             leave(regIP, regUDP, my_node);
             on_node = 0;
+            printf("Please type out a function with the formatting shown above\n\n");
         }
     }
     else if(isExit(buffer)){
@@ -193,27 +195,32 @@ void function_selector(char *buffer, char *regIP, char *regUDP, t_node_info *my_
         if((atoi(my_node->own_id) == atoi(my_node->succ_id)) && (strcmp(my_node->own_IP, my_node->succ_IP)==0) && strcmp(my_node->own_port, my_node->succ_port)==0){
             printf("Created a ring for this node\n");
             strcpy(my_node->sec_suc_id,my_node->own_id);
+            printf("Please type out a function with the formatting shown above\n\n");
             return;
         }
         else{
             join_node(my_node);
+            printf("Please type out a function with the formatting shown above\n\n");
         }
-        strcpy(my_node->sec_suc_id,my_node->own_id);
     }
     else if(isFunction("st", "show topology", buffer)){
+        printf("\n");
         printf("Showing this node`s topology:\n");
         printf("My id: %s, My IP: %s, My port: %s\n", my_node->own_id, my_node->own_IP, my_node->own_port);
         printf("Sucessor id: %s, Sucessor IP: %s, Sucessor port: %s\n", my_node->succ_id, my_node->succ_IP, my_node->succ_port);
         printf("Second Sucessor id: %s, Second Sucessor IP: %s, Second Sucessor port: %s\n", my_node->sec_suc_id, my_node->sec_suc_IP, my_node->sec_suc_port);
-        printf("Predecessor id: %s\n", my_node->pred_id);
+        printf("Predecessor id: %s\n\n", my_node->pred_id);
+        printf("Please type out a function with the formatting shown above\n\n");
     }
     else if(strcmp(isShowRouting(buffer), "error") != 0){
         if(strlen(isShowRouting(buffer))!=2 && strcmp(isShowRouting(buffer), "all")!=0){
             printf("%s is not a valid destination id\n", isShowRouting(buffer));
+            printf("Please type out a function with the formatting shown above\n\n");
             return;
         }
         else{
             print_routing_table(my_node, isShowRouting(buffer));
+            printf("Please type out a function with the formatting shown above\n\n");
         }
     }
     else if(strcmp(isShowPath(buffer), "error") != 0){
@@ -222,6 +229,7 @@ void function_selector(char *buffer, char *regIP, char *regUDP, t_node_info *my_
         }
         else{
             print_shortest_path(my_node, isShowPath(buffer));
+            printf("Please type out a function with the formatting shown above\n\n");
         }
     }
     else if(isShowForwarding(buffer)){
@@ -229,6 +237,7 @@ void function_selector(char *buffer, char *regIP, char *regUDP, t_node_info *my_
     }
     else{
         printf("Your input is not an available function\n");
+        printf("Please type out a function with the formatting shown above\n\n");
         return;
     }
 }

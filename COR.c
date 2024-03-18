@@ -58,24 +58,20 @@ int main(int argc, char* argv[]){
         }
         if(FD_ISSET(0, &ready_sockets)){//user input on stdin
             process_user_input(regIP, regUDP, my_node);
-            printf("Please type out a function with the formatting shown above\n\n");
         }
         if(FD_ISSET(my_node->tcp_server_fd, &ready_sockets)){//message from a new node
             receive_message(my_node);
-            printf("Please type out a function with the formatting shown above\n\n");
             continue;
         }
         if(my_node->succ_fd>0){
             if(FD_ISSET(my_node->succ_fd, &ready_sockets)){//message from the successor
                 receive_from_succ(my_node);
-                printf("Please type out a function with the formatting shown above\n\n");
                 continue;
             }
         }
         if(my_node->pred_fd>0){
             if(FD_ISSET(my_node->pred_fd, &ready_sockets)){//message from the successor(In this case its when it closes)
                 receive_from_pred(my_node);
-                printf("Please type out a function with the formatting shown above\n\n");
                 continue;
             }
         }

@@ -33,7 +33,7 @@ void print_routing_table(t_node_info *my_node, char dest[3]){
 }
 
 void print_shortest_path(t_node_info *my_node, char dest[3]){
-    printf("| %-10s | %-10s |\n", "Destination", "Path");
+    printf("| %-10s | %-10s |\n", "Dest", "Path");
     
     // Print divider
     printf("|------------|------------|\n");

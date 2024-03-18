@@ -145,9 +145,11 @@ void receive_from_succ(t_node_info *my_node){
 
     if(strncmp(function, "SUCC", 5)==0){
         new_sec_succ(my_node, buffer); /*If I receive a SUCC from my SUCC means that my sucessor is informing me of my SEC Succ*/
+        printf("Please type out a function with the formatting shown above\n\n");
     }
     else if(strncmp(function, "ENTRY", 6)==0){ /*If I receive a ENTRY from my SUCC means that im being informed that my SUCC and SEC SUCC are going to change*/
         new_succ(my_node, buffer);
+        printf("Please type out a function with the formatting shown above\n\n");
     }
     else if(strncmp(function, "ROUTE", 6)==0){
         process_route_messages(my_node, buffer);
@@ -175,6 +177,9 @@ void receive_from_pred(t_node_info *my_node){
     if(strncmp(function, "ROUTE", 6)==0){
         process_route_messages(my_node, buffer);
     }
+    else{
+        printf("Please type out a function with the formatting shown above\n\n");
+    }
 }
 
 void new_succ(t_node_info *my_node, char buffer[128]){
@@ -188,7 +193,7 @@ void new_succ(t_node_info *my_node, char buffer[128]){
     else{
         warn_pred(my_node);
         warn_sec_succ(my_node);
-        printf("The node %s with ip: %s and port: %s, has joined your ring\n", my_node->succ_id, my_node->succ_IP, my_node->succ_port);           
+        printf("New Sucessor %s\n", my_node->succ_id);           
     }  
        
 }
@@ -198,7 +203,7 @@ void new_sec_succ(t_node_info *my_node, char buffer[128]){
         printf("An atempt at joing your ring chat was made but it failed due to bad formatting\n");
     }
     else{
-        printf("The node %s with ip: %s and port: %s, has joined your ring\n", my_node->sec_suc_id, my_node->sec_suc_IP, my_node->sec_suc_port);           
+        printf("New second succesor %s\n", my_node->sec_suc_id);           
     }  
 }
 
@@ -262,10 +267,12 @@ void receive_message(t_node_info *my_node){
 
     if(strncmp(function, "ENTRY", 6)==0){
         joining_node(my_node, newfd, buffer);
+        printf("Please type out a function with the formatting shown above\n\n");
     }
     else if(strncmp(function, "PRED", 5)==0){
         new_pred(my_node, newfd, buffer);
         routing_table_init(my_node);
+        printf("Please type out a function with the formatting shown above\n\n");
     }
 
     return;
