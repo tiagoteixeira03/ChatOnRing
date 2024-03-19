@@ -213,7 +213,7 @@ void function_selector(char *buffer, char *regIP, char *regUDP, t_node_info *my_
         printf("Please type out a function with the formatting shown above\n\n");
     }
     else if(strcmp(isShowRouting(buffer), "error") != 0){
-        if(strlen(isShowRouting(buffer))!=2 && strcmp(isShowRouting(buffer), "all")!=0){
+        if((strlen(isShowRouting(buffer))!=2) == (strcmp(isShowRouting(buffer), "all")!=0)){
             printf("%s is not a valid destination id\n", isShowRouting(buffer));
             printf("Please type out a function with the formatting shown above\n\n");
             return;
@@ -224,7 +224,7 @@ void function_selector(char *buffer, char *regIP, char *regUDP, t_node_info *my_
         }
     }
     else if(strcmp(isShowPath(buffer), "error") != 0){
-        if(strlen(isShowPath(buffer))!=2 && strcmp(isShowPath(buffer), "all")!=0){
+        if((strlen(isShowPath(buffer))!=2) == (strcmp(isShowPath(buffer), "all")!=0)){
             printf("%s is not a valid destination id\n", isShowPath(buffer));
         }
         else{

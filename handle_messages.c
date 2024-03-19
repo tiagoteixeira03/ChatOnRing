@@ -136,6 +136,9 @@ void receive_from_succ(t_node_info *my_node){
     if(n==-1)/*error*/exit(1);
 
     if(n == 0){
+        my_node->node_just_left=1;
+        printf("I will remove %s from my routing table\n", my_node->succ_id);
+        delete_node_from_tables(my_node, my_node->succ_id);
         close(my_node->succ_fd);
         node_left(my_node);
         return;
@@ -166,6 +169,8 @@ void receive_from_pred(t_node_info *my_node){
     if(n==-1)/*error*/exit(1);
 
     if(n==0){
+        printf("I will remove %s from my routing table\n", my_node->pred_id);
+        delete_node_from_tables(my_node, my_node->pred_id);
         my_node->node_just_left=1;
         close(my_node->pred_fd);
         my_node->pred_fd=0;
@@ -204,6 +209,10 @@ void new_sec_succ(t_node_info *my_node, char buffer[128]){
     }
     else{
         printf("New second succesor %s\n", my_node->sec_suc_id);           
+    }
+    if(my_node->node_just_left==1){
+        routing_table_init(my_node);
+        my_node->node_just_left = 0;
     }  
 }
 
@@ -302,6 +311,7 @@ void new_pred(t_node_info *my_node, int newfd, char buffer[128]){
         n=write(my_node->pred_fd, buffer_out, sizeof(buffer_out));
         if(n==-1)/*error*/exit(1);
 
+        routing_table_init(my_node);
         my_node->node_just_left = 0;
     }
 }

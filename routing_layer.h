@@ -12,6 +12,6 @@ char* convert_single_digit_numbers(int number);
 void send_route_messages(t_node_info *my_node, char buffer[512]);
 void write_route_messages(t_node_info *my_node);
 void process_route_messages(t_node_info *my_node, char buffer[512]);
-
+void delete_node_from_tables(t_node_info *my_node, char *node_id);
 
 #endif
