@@ -52,6 +52,24 @@ void print_shortest_path(t_node_info *my_node, char dest[3]){
     }
 }
 
+void print_forwarding_table(t_node_info *my_node){
+    printf("| %-10s | %-10s |\n", "Dest.", "Next");
+    
+    // Print divider
+    printf("|------------|------------|\n");
+ 
+    // Print table rows
+    for(int i=0; i<100; i++){
+        if(strcmp(my_node->shortest_paths_table[i], "-")!=0){ //If there is a node
+            // Print table row
+            printf("| %-10d | %-10s |\n", i, my_node->forwarding_table[i]);
+        }
+        else if(i == atoi(my_node->own_id)){
+            printf("| %-10d | %-10s |\n", i, my_node->forwarding_table[i]);
+        }
+    }
+}
+
 void reset_tables(t_node_info *my_node){
     for(int i=0; i<100; i++){
         for(int j=0; j<100; j++){
@@ -101,6 +119,25 @@ int routing_to_shortest_paths_table(t_node_info *my_node){
     return modified;
 }
 
+void shortest_paths_to_forwarding_table(t_node_info *my_node){
+    char *token;
+
+    for(int i=0; i<100; i++){
+        if(i == atoi(my_node->own_id)){
+            strcpy(my_node->forwarding_table[i], "-");
+            continue;
+        }
+        token = strchr(my_node->shortest_paths_table[i], '-') + 1;
+        if(token == NULL){
+            strcpy(my_node->forwarding_table[i], "-");
+        }
+        else{
+            strncpy(my_node->forwarding_table[i], token, 2);
+            my_node->forwarding_table[i][2] = '\0';
+        }
+    }
+}
+
 void routing_table_init(t_node_info *my_node){
     char buffer_succ[256]="", buffer_pred[256]="", buffer_sec_succ[256]="";
 
@@ -127,7 +164,7 @@ void routing_table_init(t_node_info *my_node){
     }
 
     routing_to_shortest_paths_table(my_node); /*Update shortest paths table*/
-    write_route_messages(my_node); /*Send ROUTE messages to my neighbours*/
+    write_route_messages(my_node, "none"); /*Send ROUTE messages to my neighbours*/
 }
 
 char* convert_single_digit_numbers(int number){
@@ -151,12 +188,14 @@ void send_route_messages(t_node_info *my_node, char buffer[512]){
     n = write(my_node->succ_fd, buffer, strlen(buffer));
     if(n==-1) exit(1);
 
-    n = write(my_node->pred_fd, buffer, strlen(buffer));
-    if(n==-1) exit(1);
+    if(atoi(my_node->own_id) != atoi(my_node->sec_suc_id)){ /*If there's 3 nodes or more*/
+        n = write(my_node->pred_fd, buffer, strlen(buffer));
+        if(n==-1) exit(1);
+    }
 }
 
 
-void write_route_messages(t_node_info *my_node){
+void write_route_messages(t_node_info *my_node, char *leaving_node){
     char buffer[512]="";
 
     for(int i=0; i<100; i++){
@@ -170,42 +209,88 @@ void write_route_messages(t_node_info *my_node){
             strcat(buffer, "\n");
         }
     }
-    strcat(buffer, "ROUTE ");
+    if(strcmp(leaving_node, "none") == 0){
+        strcat(buffer, "ROUTE ");
+        strcat(buffer, my_node->own_id);
+        strcat(buffer, " ");
+        strcat(buffer, my_node->own_id);
+        strcat(buffer, " ");
+        strcat(buffer, my_node->own_id);
+        strcat(buffer, "\n");
+    }
+    else{
+        strcat(buffer, "ROUTE ");
+        strcat(buffer, my_node->own_id);
+        strcat(buffer, " ");
+        strcat(buffer, leaving_node);
+        strcat(buffer, "\n");
+    }
+    
+    send_route_messages(my_node, buffer);
+}
+
+void update_leave(t_node_info *my_node, char *leaving_node){
+    char buffer[128]="ROUTE ";
+    ssize_t n;
+
     strcat(buffer, my_node->own_id);
     strcat(buffer, " ");
-    strcat(buffer, my_node->own_id);
-    strcat(buffer, " ");
-    strcat(buffer, my_node->own_id);
+    strcat(buffer, leaving_node);
     strcat(buffer, "\n");
 
-    send_route_messages(my_node, buffer);
+    n=write(my_node->succ_fd, buffer, sizeof(buffer));
+    if(n==-1) exit(1);
+    n=write(my_node->pred_fd, buffer, sizeof(buffer));
+    if(n==-1) exit(1);
+
+    return;
 }
 
 void process_route_messages(t_node_info *my_node, char buffer[512]){
     char *token, neighbour_id[3]="", destination_id[3]="", path[48]="", new_path[56]="";
-    
+    char leaving_node[5]="none";
+
     token = strtok(buffer, "\n");
     while(token != NULL){
-        sscanf(token, "%*s %s %s %s", neighbour_id, destination_id, path);
-        if(strstr(path, my_node->own_id) == NULL){
-            sprintf(new_path, "%s-%s", my_node->own_id, path);
-            strcpy(my_node->routing_table[atoi(destination_id)][atoi(neighbour_id)], new_path);
+        if(sscanf(token, "%*s %s %s %s", neighbour_id, destination_id, path) == 3){
+            if(strstr(path, my_node->own_id) == NULL){
+                sprintf(new_path, "%s-%s", my_node->own_id, path);
+                strcpy(my_node->routing_table[atoi(destination_id)][atoi(neighbour_id)], new_path);
+            }
+            else{
+                strcpy(my_node->routing_table[atoi(destination_id)][atoi(neighbour_id)], "-");
+            } 
+            strcpy(path, ""); //Reset Path
+            token = strtok(NULL, "\n");
         }
         else{
-            strcpy(my_node->routing_table[atoi(destination_id)][atoi(neighbour_id)], "-");
-        } 
-        token = strtok(NULL, "\n");
+            strcpy(leaving_node, destination_id);
+            if(delete_node_from_tables(my_node, leaving_node) == 0){//If I already know that the node left
+                return;
+            }
+            update_leave(my_node, leaving_node);
+            return;
+        }
     }
     if(routing_to_shortest_paths_table(my_node)){ /*If shortest paths table changed*/
-        write_route_messages(my_node); //Send my new table to my neighbours
+        write_route_messages(my_node, leaving_node); //Send my new table to my neighbours
     }
 }
 
-void delete_node_from_tables(t_node_info *my_node, char *node_id){
+int delete_node_from_tables(t_node_info *my_node, char *node_id){
+    int deleted_table = 0;
+
     for(int i=0; i<100; i++){
+        if(strcmp(my_node->routing_table[i][atoi(node_id)], "-") != 0 || strcmp(my_node->routing_table[atoi(node_id)][i], "-") != 0){
+            deleted_table=1;
+        }
         strcpy(my_node->routing_table[i][atoi(node_id)], "-");
         strcpy(my_node->routing_table[atoi(node_id)][i], "-");
     }
+    if(strcmp(my_node->shortest_paths_table[atoi(node_id)], "-") != 0){
+        deleted_table=1;
+    }
     strcpy(my_node->shortest_paths_table[atoi(node_id)], "-");
-    write_route_messages(my_node);
+
+    return deleted_table;
 }

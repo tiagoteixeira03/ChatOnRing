@@ -132,13 +132,15 @@ void receive_from_succ(t_node_info *my_node){
 
     function = (char*)malloc(6*sizeof(char));
 
-    n=read(my_node->succ_fd, buffer, 512);
+    n=read(my_node->succ_fd, buffer, sizeof(buffer) - 1);
     if(n==-1)/*error*/exit(1);
+
+    buffer[n]='\0';
 
     if(n == 0){
         my_node->node_just_left=1;
-        printf("I will remove %s from my routing table\n", my_node->succ_id);
         delete_node_from_tables(my_node, my_node->succ_id);
+        write_route_messages(my_node, my_node->succ_id);
         close(my_node->succ_fd);
         node_left(my_node);
         return;
@@ -165,12 +167,14 @@ void receive_from_pred(t_node_info *my_node){
 
     function = (char*)malloc(6*sizeof(char));
 
-    n=read(my_node->pred_fd, buffer, 512);
+    n=read(my_node->pred_fd, buffer, sizeof(buffer) - 1);
     if(n==-1)/*error*/exit(1);
 
+    buffer[n] = '\0';
+
     if(n==0){
-        printf("I will remove %s from my routing table\n", my_node->pred_id);
         delete_node_from_tables(my_node, my_node->pred_id);
+        write_route_messages(my_node, my_node->pred_id);
         my_node->node_just_left=1;
         close(my_node->pred_fd);
         my_node->pred_fd=0;

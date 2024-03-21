@@ -233,7 +233,8 @@ void function_selector(char *buffer, char *regIP, char *regUDP, t_node_info *my_
         }
     }
     else if(isShowForwarding(buffer)){
-        //print forwarding table
+        shortest_paths_to_forwarding_table(my_node);
+        print_forwarding_table(my_node);
     }
     else{
         printf("Your input is not an available function\n");
