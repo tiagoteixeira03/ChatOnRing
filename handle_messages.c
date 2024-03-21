@@ -14,6 +14,7 @@
 #include "handle_messages.h"
 #include "tcp_client.h"
 #include "routing_layer.h"
+#include "message.h"
 
 void join_node(t_node_info *my_node){
     char buffer_in[128] = "ENTRY ", buffer_out[128], *function;
@@ -159,6 +160,9 @@ void receive_from_succ(t_node_info *my_node){
     else if(strncmp(function, "ROUTE", 6)==0){
         process_route_messages(my_node, buffer);
     }
+    else if(strncmp(function, "CHAT", 5)==0){
+        receive_chat_instruction(my_node, buffer);
+    }
 }
 
 void receive_from_pred(t_node_info *my_node){
@@ -185,6 +189,9 @@ void receive_from_pred(t_node_info *my_node){
 
     if(strncmp(function, "ROUTE", 6)==0){
         process_route_messages(my_node, buffer);
+    }
+    else if(strncmp(function, "CHAT", 5)==0){
+        receive_chat_instruction(my_node, buffer);
     }
     else{
         printf("Please type out a function with the formatting shown above\n\n");

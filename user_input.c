@@ -8,6 +8,7 @@
 #include "leave.h"
 #include "handle_messages.h"
 #include "routing_layer.h"
+#include "message.h"
 
 #define BUFFERSIZE 128
 
@@ -168,6 +169,26 @@ int isShowForwarding(char *buffer){
     }
 }
 
+int isMessage(char *buffer){
+    int result;
+    char dest[3]="", message[128]="";
+
+    result = isFunction("m", "message", buffer);
+
+    if(result == 1 || result == 2){
+        if(sscanf(buffer, "%*s %s %s", dest, message) == 2){
+            if(atoi(dest)>99 || atoi(dest)<0){
+                printf("Destination node id must be in between 0 and 99\n");
+                return 0;
+            }
+            else{
+                return 1;
+            }
+        }
+    }
+    return 0;
+}
+
 void function_selector(char *buffer, char *regIP, char *regUDP, t_node_info *my_node){
     static int on_node = 0;
 
@@ -236,6 +257,11 @@ void function_selector(char *buffer, char *regIP, char *regUDP, t_node_info *my_
         shortest_paths_to_forwarding_table(my_node);
         print_forwarding_table(my_node);
     }
+    else if(isMessage(buffer)){
+        char dest[3]="", message[128]="";
+        sscanf(buffer, "%*s %s %s", dest, message);
+        send_chat_instruction(my_node, my_node->own_id, dest, message);
+    }
     else{
         printf("Your input is not an available function\n");
         printf("Please type out a function with the formatting shown above\n\n");
@@ -267,5 +293,4 @@ void process_user_input(char *regIP, char *regUDP, t_node_info *my_node){
     free(buffer);
 
     return;
-
 }

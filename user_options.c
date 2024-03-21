@@ -52,5 +52,4 @@ void process_user_arguments(int argc, char *argv[], char **regIP, char **regUDP,
         strcpy(*regIP, "tejo.tecnico.ulisboa.pt");//192.168.1.1
         strcpy(*regUDP, "59000");
     }
-
 }
