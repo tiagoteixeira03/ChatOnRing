@@ -47,8 +47,10 @@ void join_node(t_node_info *my_node){
     n=write(my_node->succ_fd, buffer_in, sizeof(buffer_in)); //"ENTRY i i.IP i.TCP"
     if(n==-1)/*error*/exit(1);
  
-    n=read(my_node->succ_fd, buffer_out,128);
+    n=read(my_node->succ_fd, buffer_out,sizeof(buffer_out)-1);
     if(n==-1)/*error*/exit(1);
+    buffer_out[n]='\0';
+
 
     sscanf(buffer_out, "%s", function);
 
@@ -280,8 +282,9 @@ void receive_message(t_node_info *my_node){
     addrlen=sizeof(addr);
     if((newfd=accept(my_node->tcp_server_fd,(struct sockaddr*)&addr,&addrlen))==-1)/*error*/ exit(1);
 
-    n=read(newfd, buffer,128);
+    n=read(newfd, buffer,sizeof(buffer)-1);
     if(n==-1)/*error*/exit(1);
+    buffer[n]='\0';
 
     sscanf(buffer, "%s", function); //Get only first word from buffer
 

@@ -168,19 +168,21 @@ void routing_table_init(t_node_info *my_node){
 }
 
 char* convert_single_digit_numbers(int number){
-    char *converted_number=(char*)malloc(10*sizeof(char)), string_number[3];
+    char string_number[3];
+    sprintf(string_number, "%02d", number);  // Using "%02d" to ensure two-digit formatting
 
-    sprintf(string_number, "%d", number);
+    char *converted_number = (char*)malloc((strlen(string_number) + 1) * sizeof(char)); // Allocate memory based on the length of the string
+    if (converted_number == NULL) {
+        // Handle memory allocation failure
+        printf("failed to allocate memory for converted number\n");
+        return NULL;
+    }
 
-    if(number<10){
-        strcat(converted_number, "0");
-        strcat(converted_number, string_number);
-    }
-    else{
-        strcpy(converted_number, string_number);
-    }
+    strcpy(converted_number, string_number); // Copy the string
+
     return converted_number;
 }
+
 
 void send_route_messages(t_node_info *my_node, char buffer[512]){
     ssize_t n;
