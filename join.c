@@ -53,7 +53,7 @@ void join(char *regIP, char *regUDP, t_node_info *my_node){
     socklen_t addrlen;
     struct sockaddr_in addr;
     struct addrinfo hints, *res;
-    char buffer_in[BUFFERSIZE] = "REG ", buffer_out[BUFFERSIZE], node_info[10] = "NODES ", nodes_list[512], *token, id_check[16], nodes_list_buffer[512];
+    char buffer_in[BUFFERSIZE] = "REG ", buffer_out[BUFFERSIZE], node_info[10] = "NODES ", nodes_list[512]="", *token, id_check[16], nodes_list_buffer[512]="";
 
     memset(&hints,0,sizeof hints);
 
