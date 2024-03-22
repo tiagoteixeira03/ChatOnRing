@@ -41,8 +41,8 @@ void process_user_arguments(int argc, char *argv[], char **regIP, char **regUDP,
         exit(1);
     }
 
-    *regIP = malloc(16*sizeof(char));
-    *regUDP = malloc(6*sizeof(char));
+    *regIP = malloc(20*sizeof(char));
+    *regUDP = malloc(7*sizeof(char));
 
     strcpy(my_node->own_IP, argv[1]);
     strcpy(my_node->own_port, argv[2]);

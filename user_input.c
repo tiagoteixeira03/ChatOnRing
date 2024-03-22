@@ -194,6 +194,7 @@ int isMessage(char *buffer, t_node_info *my_node){
 
 void function_selector(char *buffer, char *regIP, char *regUDP, t_node_info *my_node){
     static int on_node = 0;
+    char *dest_sr=NULL, *dest_sp=NULL;
 
     if (isJoin(buffer, my_node)){
         join(regIP, regUDP, my_node);
@@ -212,6 +213,9 @@ void function_selector(char *buffer, char *regIP, char *regUDP, t_node_info *my_
     }
     else if(isExit(buffer)){
         printf("Thank you for using this chatting app\n");
+        free(regIP);
+        free(regUDP);
+        free(my_node);
         exit(0);
     }
     else if(isDirectjoin(buffer, my_node)){
@@ -236,40 +240,49 @@ void function_selector(char *buffer, char *regIP, char *regUDP, t_node_info *my_
         printf("Predecessor id: %s\n\n", my_node->pred_id);
         printf("Please type out a function with the formatting shown above\n\n");
     }
-    else if(strcmp(isShowRouting(buffer), "error") != 0){
-        if((strlen(isShowRouting(buffer))!=2) == (strcmp(isShowRouting(buffer), "all")!=0)){
-            printf("%s is not a valid destination id\n", isShowRouting(buffer));
-            printf("Please type out a function with the formatting shown above\n\n");
-            return;
-        }
-        else{
-            print_routing_table(my_node, isShowRouting(buffer));
-            printf("Please type out a function with the formatting shown above\n\n");
-        }
-    }
-    else if(strcmp(isShowPath(buffer), "error") != 0){
-        if((strlen(isShowPath(buffer))!=2) == (strcmp(isShowPath(buffer), "all")!=0)){
-            printf("%s is not a valid destination id\n", isShowPath(buffer));
-        }
-        else{
-            print_shortest_path(my_node, isShowPath(buffer));
-            printf("Please type out a function with the formatting shown above\n\n");
-        }
-    }
-    else if(isShowForwarding(buffer)){
-        shortest_paths_to_forwarding_table(my_node);
-        print_forwarding_table(my_node);
-    }
-    else if(isMessage(buffer, my_node)){
-        char dest[3]="", message[128]="";
-        sscanf(buffer, "%*s %s %s", dest, message);
-        send_chat_instruction(my_node, my_node->own_id, dest, message);
-    }
     else{
-        printf("Your input is wrong or is not an available function\n");
-        printf("Please type out a function with the formatting shown above\n\n");
-        return;
+        dest_sr = isShowRouting(buffer);
+        if(strcmp(dest_sr, "error") != 0){
+            if((strlen(dest_sr)!=2) == (strcmp(dest_sr, "all")!=0)){
+                printf("%s is not a valid destination id\n", dest_sr);
+                printf("Please type out a function with the formatting shown above\n\n");
+                return;
+            }
+            else{
+                print_routing_table(my_node, isShowRouting(buffer));
+                printf("Please type out a function with the formatting shown above\n\n");
+            }
+        }
+        else{
+            dest_sp = isShowPath(buffer);
+            if(strcmp(dest_sp, "error") != 0){
+                if((strlen(dest_sp)!=2) == (strcmp(dest_sp, "all")!=0)){
+                    printf("%s is not a valid destination id\n", dest_sp);
+                }
+                else{
+                    print_shortest_path(my_node, dest_sp);
+                    printf("Please type out a function with the formatting shown above\n\n");
+                }
+            }
+            else if(isShowForwarding(buffer)){
+                shortest_paths_to_forwarding_table(my_node);
+                print_forwarding_table(my_node);
+            }
+            else if(isMessage(buffer, my_node)){
+                char dest[3]="", message[128]="";
+                sscanf(buffer, "%*s %s %s", dest, message);
+                send_chat_instruction(my_node, my_node->own_id, dest, message);
+            }
+            else{
+                printf("Your input is wrong or is not an available function\n");
+                printf("Please type out a function with the formatting shown above\n\n");
+                return;
+            }
+        }
     }
+    free(dest_sp);
+    free(dest_sr);
+    return;
 }
 
 char* get_user_input(){
