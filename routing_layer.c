@@ -12,60 +12,116 @@
 #include "routing_layer.h"
 
 void print_routing_table(t_node_info *my_node, char dest[3]){
+    int largest_path_length = 0;
+
+    //Find largest path
+    if(strcmp(dest, "all") == 0){
+        for(int j=0; j<100; j++){
+            if(strlen(my_node->routing_table[j][atoi(my_node->succ_id)]) > largest_path_length){
+                largest_path_length = strlen(my_node->routing_table[j][atoi(my_node->succ_id)]);
+            }
+            if(strlen(my_node->routing_table[j][atoi(my_node->pred_id)]) > largest_path_length){
+                largest_path_length = strlen(my_node->routing_table[j][atoi(my_node->pred_id)]);
+            }
+        }
+    }
+    else{
+        if(strlen(my_node->routing_table[atoi(dest)][atoi(my_node->succ_id)]) > strlen(my_node->routing_table[atoi(dest)][atoi(my_node->pred_id)])){
+            largest_path_length = strlen(my_node->routing_table[atoi(dest)][atoi(my_node->succ_id)]);
+        }
+        else{
+            largest_path_length = strlen(my_node->routing_table[atoi(dest)][atoi(my_node->pred_id)]);
+        }
+    }
+
     // Print table neighbours
-    printf("| %-10s | %-10s | %-10s |\n", " ", my_node->succ_id, my_node->pred_id);
+    printf("| %-5s | %-*s | %-*s |\n", " ", largest_path_length, my_node->succ_id, largest_path_length, my_node->pred_id);
     
     // Print divider
-    printf("|------------|------------|------------|\n");
+    printf("|");
+    for (int i = 0; i < 7; i++) {
+        printf("-");
+    }
+    printf("|");
+    for (int i = 0; i < largest_path_length + 2; i++) {
+        printf("-");
+    }
+    printf("|");
+    for (int i = 0; i < largest_path_length + 2; i++) {
+        printf("-");
+    }
+    printf("|\n");
     
     if(strcmp(dest, "all")!=0){ //If user selects a single destination
         // Print table row
-        printf("| %-10s | %-10s | %-10s |\n", dest, my_node->routing_table[atoi(dest)][atoi(my_node->succ_id)], my_node->routing_table[atoi(dest)][atoi(my_node->pred_id)]);
+        printf("| %-5s | %-*s | %-*s |\n", dest, largest_path_length, my_node->routing_table[atoi(dest)][atoi(my_node->succ_id)], largest_path_length, my_node->routing_table[atoi(dest)][atoi(my_node->pred_id)]);
     }
     else{
         for(int i=0; i<100; i++){
             if(strcmp(my_node->routing_table[i][atoi(my_node->succ_id)], "-") != 0 || strcmp(my_node->routing_table[i][atoi(my_node->pred_id)], "-") != 0){
                 // Print table row
-                printf("| %-10d | %-10s | %-10s |\n", i, my_node->routing_table[i][atoi(my_node->succ_id)], my_node->routing_table[i][atoi(my_node->pred_id)]);
+                printf("| %-5d | %-*s | %-*s |\n", i, largest_path_length, my_node->routing_table[i][atoi(my_node->succ_id)], largest_path_length, my_node->routing_table[i][atoi(my_node->pred_id)]);
             }
         }
     }
 }
 
 void print_shortest_path(t_node_info *my_node, char dest[3]){
-    printf("| %-10s | %-10s |\n", "Dest.", "Path");
+    int largest_path_length = 0;
+
+    //Find largest path
+    if(strcmp(dest, "all") == 0){
+        for(int j=0; j<100; j++){
+            if(strlen(my_node->shortest_paths_table[j]) > largest_path_length){
+                largest_path_length = strlen(my_node->shortest_paths_table[j]);
+            }
+        }
+    }
+    else{
+        largest_path_length = strlen(my_node->shortest_paths_table[atoi(dest)]);
+    }
+
+    printf("| %-5s | %-*s |\n", "Dest.", largest_path_length, "Path");
     
     // Print divider
-    printf("|------------|------------|\n");
+    printf("|");
+    for (int i = 0; i < 7; i++) {
+        printf("-");
+    }
+    printf("|");
+    for (int i = 0; i < largest_path_length + 2; i++) {
+        printf("-");
+    }
+    printf("|\n");
     
     if(strcmp(dest, "all")!=0){ //If user selects a single destination        
         // Print table row
-        printf("| %-10s | %-10s |\n", dest, my_node->shortest_paths_table[atoi(dest)]);
+        printf("| %-5s | %-*s |\n", dest, largest_path_length, my_node->shortest_paths_table[atoi(dest)]);
     }
     else{
         for(int i=0; i<100; i++){
             if(strcmp(my_node->shortest_paths_table[i], "-")!=0){ //If there is a path
                 // Print table row
-                printf("| %-10d | %-10s |\n", i, my_node->shortest_paths_table[i]);
+                printf("| %-5d | %-*s |\n", i, largest_path_length, my_node->shortest_paths_table[i]);
             } 
         }
     }
 }
 
 void print_forwarding_table(t_node_info *my_node){
-    printf("| %-10s | %-10s |\n", "Dest.", "Next");
+    printf("| %-5s | %-5s |\n", "Dest.", "Next");
     
     // Print divider
-    printf("|------------|------------|\n");
+    printf("|-------|-------|\n");
  
     // Print table rows
     for(int i=0; i<100; i++){
         if(strcmp(my_node->shortest_paths_table[i], "-")!=0){ //If there is a node
             // Print table row
-            printf("| %-10d | %-10s |\n", i, my_node->forwarding_table[i]);
+            printf("| %-5d | %-5s |\n", i, my_node->forwarding_table[i]);
         }
         else if(i == atoi(my_node->own_id)){
-            printf("| %-10d | %-10s |\n", i, my_node->forwarding_table[i]);
+            printf("| %-5d | %-5s |\n", i, my_node->forwarding_table[i]);
         }
     }
 }
