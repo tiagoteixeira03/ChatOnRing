@@ -252,11 +252,15 @@ void function_selector(char *buffer, char *regIP, char *regUDP, t_node_info *my_
                 return;
             }
             else{
-                print_routing_table(my_node, isShowRouting(buffer));
+                print_routing_table(my_node, dest);
                 printf("Please type out a function with the formatting shown above\n\n");
             }
         }
         else{
+            if(dest != NULL){
+                free(dest);
+                dest = NULL;
+            }
             dest = isShowPath(buffer);
             if(strcmp(dest, "error") != 0){
                 if((strlen(dest)!=2) == (strcmp(dest, "all")!=0)){
@@ -270,6 +274,7 @@ void function_selector(char *buffer, char *regIP, char *regUDP, t_node_info *my_
             else if(isShowForwarding(buffer)){
                 shortest_paths_to_forwarding_table(my_node);
                 print_forwarding_table(my_node);
+                printf("Please type out a function with the formatting shown above\n\n");
             }
             else if(isMessage(buffer, my_node)){
                 char dest[3]="", message[128]="";

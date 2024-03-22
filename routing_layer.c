@@ -206,7 +206,7 @@ void write_route_messages(t_node_info *my_node, char *leaving_node){
             strcat(buffer, my_node->own_id);
             strcat(buffer, " ");
             converted_number = convert_single_digit_numbers(i); 
-            strcat(buffer, convert_single_digit_numbers(i));
+            strcat(buffer, converted_number);
             free(converted_number);
             strcat(buffer, " ");
             strcat(buffer, my_node->shortest_paths_table[i]);

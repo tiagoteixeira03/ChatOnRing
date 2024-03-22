@@ -68,6 +68,8 @@ void join_node(t_node_info *my_node){
         strcpy(my_node->pred_port, my_node->succ_port);
         my_node->pred_fd = my_node->succ_fd;
     }
+    freeaddrinfo(res);
+    free(function);
 }
 
 void joining_node(t_node_info *my_node, int newfd, char buffer[128]){
@@ -130,10 +132,10 @@ void update_sucessor(t_node_info *my_node){
 }
 
 void receive_from_succ(t_node_info *my_node){
-    char buffer[512], *function;
+    char buffer[512], *function=NULL;
     ssize_t n;
 
-    function = (char*)malloc(6*sizeof(char));
+    function = (char*)calloc(6,sizeof(char));
 
     n=read(my_node->succ_fd, buffer, sizeof(buffer) - 1);
     if(n==-1)/*error*/exit(1);
@@ -146,6 +148,7 @@ void receive_from_succ(t_node_info *my_node){
         write_route_messages(my_node, my_node->succ_id);
         close(my_node->succ_fd);
         node_left(my_node);
+        free(function);
         return;
     }
 
@@ -165,13 +168,14 @@ void receive_from_succ(t_node_info *my_node){
     else if(strncmp(function, "CHAT", 5)==0){
         receive_chat_instruction(my_node, buffer);
     }
+    free(function);
 }
 
 void receive_from_pred(t_node_info *my_node){
-    char buffer[512], *function;
+    char buffer[512], *function=NULL;
     ssize_t n;
 
-    function = (char*)malloc(6*sizeof(char));
+    function = (char*)calloc(6,sizeof(char));
 
     n=read(my_node->pred_fd, buffer, sizeof(buffer) - 1);
     if(n==-1)/*error*/exit(1);
@@ -184,6 +188,7 @@ void receive_from_pred(t_node_info *my_node){
         my_node->node_just_left=1;
         close(my_node->pred_fd);
         my_node->pred_fd=0;
+        free(function);
         return;
     }
 
@@ -198,6 +203,7 @@ void receive_from_pred(t_node_info *my_node){
     else{
         printf("Please type out a function with the formatting shown above\n\n");
     }
+    free(function);
 }
 
 void new_succ(t_node_info *my_node, char buffer[128]){
@@ -253,6 +259,8 @@ void warn_pred(t_node_info *my_node){
 
     n=write(my_node->succ_fd, buffer_in, sizeof(buffer_in));
     if(n==-1)/*error*/exit(1);
+
+    free(res);
 }
 
 void warn_sec_succ(t_node_info *my_node){
@@ -297,7 +305,7 @@ void receive_message(t_node_info *my_node){
         routing_table_init(my_node);
         printf("Please type out a function with the formatting shown above\n\n");
     }
-
+    free(function);
     return;
 }
 
@@ -308,7 +316,7 @@ void new_pred(t_node_info *my_node, int newfd, char buffer[128]){
         printf("An atempt at joing your ring chat was made but it failed due to bad formatting\n");
     }
     else{
-        printf("The node %s has joined your ring\n", my_node->pred_id);
+        printf("The node %s is you new pred\n", my_node->pred_id);
         my_node->pred_fd = newfd;
     }
 
@@ -368,4 +376,6 @@ void node_left(t_node_info *my_node){
 
     n=write(my_node->pred_fd, buffer_succ, sizeof(buffer_succ));
     if(n==-1)/*error*/exit(1);
+
+    freeaddrinfo(res);
 }
