@@ -20,6 +20,16 @@ void leave(char *regIP, char *regUDP, t_node_info *my_node){
     struct sockaddr_in addr;
     struct addrinfo hints, *res;
     char buffer_in[BUFFERSIZE] = "UNREG ", buffer_out[BUFFERSIZE];
+    
+    fd_set rfds;
+    struct timeval tout;
+    int counter;
+
+    FD_ZERO(&rfds);
+    FD_SET(my_node->udp_client_fd, &rfds);
+
+    tout.tv_sec = 2;
+    tout.tv_usec = 0;
 
     memset(&hints,0,sizeof hints);
 
@@ -39,25 +49,36 @@ void leave(char *regIP, char *regUDP, t_node_info *my_node){
     
     if(n==-1) /*error*/ exit(1);
 
-    addrlen=sizeof(addr);
-    n=recvfrom(my_node->udp_client_fd,buffer_out,128,0,(struct sockaddr*)&addr,&addrlen);
-    
-    if(n==-1) /*error*/ exit(1);
+    counter = select(my_node->udp_client_fd + 1, &rfds, NULL, NULL, &tout);
 
-    if(strncmp(buffer_out, "OKUNREG", 5) == 0){
+    if(counter == -1){
+        perror("Erro no select do UDP");
+        exit(EXIT_FAILURE);
+    }
+    else if(counter > 0){ /*UDP Server answered in less than 2 seconds*/
+        addrlen=sizeof(addr);
+        n=recvfrom(my_node->udp_client_fd,buffer_out,128,0,(struct sockaddr*)&addr,&addrlen);
+        if(n==-1) /*error*/ exit(1);
+
+        if(strncmp(buffer_out, "OKUNREG", 5) == 0){
         printf("Node %s has been successfully removed from ring %s\n\n", my_node->own_id, my_node->ring_id);
+        }
+        else{
+            printf("There was a problem connecting with the node server\n\n");
+        }
+
+        if(my_node->pred_fd>0){
+            close(my_node->pred_fd);
+            my_node->pred_fd=0;
+        }
+        if(my_node->succ_fd>0){
+            close(my_node->succ_fd);
+            my_node->succ_fd=0;
+        }
     }
     else{
-        printf("There was a problem connecting with the node server\n\n");
-    }
-
-    if(my_node->pred_fd>0){
-        close(my_node->pred_fd);
-        my_node->pred_fd=0;
-    }
-    if(my_node->succ_fd>0){
-        close(my_node->succ_fd);
-        my_node->succ_fd=0;
+        printf("Node Server took more than 2 seconds to answer\n");
+        printf("Please type out a function with the formatting shown above\n\n");
     }
 
     freeaddrinfo(res);
