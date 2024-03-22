@@ -17,7 +17,7 @@ typedef struct node_info{
     char pred_IP[16];
     char pred_port[6];
     char pred_id[3];
-    char ring_id[4];
+    char ring_id[10];
     int tcp_server_fd;
     int succ_fd;
     int pred_fd;
