@@ -205,12 +205,10 @@ void function_selector(char *buffer, char *regIP, char *regUDP, t_node_info *my_
     else if(isLeave(buffer)){
         if(on_node == 0){
             printf("You aren't currently connected to a node, use the command join to do so\n");
-            printf("Please type out a function with the formatting shown above\n\n");
         }
         else{
             leave(regIP, regUDP, my_node);
             on_node = 0;
-            printf("Please type out a function with the formatting shown above\n\n");
         }
     }
     else if(isExit(buffer)){
@@ -226,12 +224,10 @@ void function_selector(char *buffer, char *regIP, char *regUDP, t_node_info *my_
         if((atoi(my_node->own_id) == atoi(my_node->succ_id)) && (strcmp(my_node->own_IP, my_node->succ_IP)==0) && strcmp(my_node->own_port, my_node->succ_port)==0){
             printf("Created a ring for this node\n");
             strcpy(my_node->sec_suc_id,my_node->own_id);
-            printf("Please type out a function with the formatting shown above\n\n");
             return;
         }
         else{
             join_node(my_node);
-            printf("Please type out a function with the formatting shown above\n\n");
         }
     }
     else if(isFunction("st", "show topology", buffer)){
@@ -241,19 +237,16 @@ void function_selector(char *buffer, char *regIP, char *regUDP, t_node_info *my_
         printf("Sucessor id: %s, Sucessor IP: %s, Sucessor port: %s\n", my_node->succ_id, my_node->succ_IP, my_node->succ_port);
         printf("Second Sucessor id: %s, Second Sucessor IP: %s, Second Sucessor port: %s\n", my_node->sec_suc_id, my_node->sec_suc_IP, my_node->sec_suc_port);
         printf("Predecessor id: %s\n\n", my_node->pred_id);
-        printf("Please type out a function with the formatting shown above\n\n");
     }
     else{
         dest = isShowRouting(buffer);
         if(strcmp(dest, "error") != 0){
             if((strlen(dest)!=2) == (strcmp(dest, "all")!=0)){
                 printf("%s is not a valid destination id\n", dest);
-                printf("Please type out a function with the formatting shown above\n\n");
                 return;
             }
             else{
                 print_routing_table(my_node, dest);
-                printf("Please type out a function with the formatting shown above\n\n");
             }
         }
         else{
@@ -268,13 +261,11 @@ void function_selector(char *buffer, char *regIP, char *regUDP, t_node_info *my_
                 }
                 else{
                     print_shortest_path(my_node, dest);
-                    printf("Please type out a function with the formatting shown above\n\n");
                 }
             }
             else if(isShowForwarding(buffer)){
                 shortest_paths_to_forwarding_table(my_node);
                 print_forwarding_table(my_node);
-                printf("Please type out a function with the formatting shown above\n\n");
             }
             else if(isMessage(buffer, my_node)){
                 char dest[3]="", message[128]="";
@@ -283,7 +274,6 @@ void function_selector(char *buffer, char *regIP, char *regUDP, t_node_info *my_
             }
             else{
                 printf("Your input is wrong or is not an available function\n");
-                printf("Please type out a function with the formatting shown above\n\n");
                 return;
             }
         }

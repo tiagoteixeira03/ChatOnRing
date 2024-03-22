@@ -124,10 +124,8 @@ void join(char *regIP, char *regUDP, t_node_info *my_node){
 
     if(strncmp(buffer_out, "OKREG", 5) == 0){
         printf("Node %s has been successfully added to ring %s\n\n", my_node->own_id, my_node->ring_id);
-        printf("Please type out a function with the formatting shown above\n\n");
     }
     else{
         printf("There was a problem connecting with the node server\n\n");
-        printf("Please type out a function with the formatting shown above\n\n");
     }
 }
