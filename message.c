@@ -46,7 +46,7 @@ void receive_chat_instruction(t_node_info *my_node, char chat_instruction[512]){
             printf("Message from node %s:\n%s\n", origin, message);
         }
         else{
-            send_chat_instruction(my_node, origin, my_node->forwarding_table[atoi(dest)], message);
+            send_chat_instruction(my_node, origin, dest, message);
         }
     }
     else{

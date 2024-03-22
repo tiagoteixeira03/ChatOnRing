@@ -169,7 +169,7 @@ int isShowForwarding(char *buffer){
     }
 }
 
-int isMessage(char *buffer){
+int isMessage(char *buffer, t_node_info *my_node){
     int result;
     char dest[3]="", message[128]="";
 
@@ -181,9 +181,11 @@ int isMessage(char *buffer){
                 printf("Destination node id must be in between 0 and 99\n");
                 return 0;
             }
-            else{
-                return 1;
+            if(strcmp(dest, my_node->own_id)==0){
+                printf("You can't message your own id\n");
+                return 0;
             }
+            return 1;
         }
     }
     return 0;
@@ -257,13 +259,13 @@ void function_selector(char *buffer, char *regIP, char *regUDP, t_node_info *my_
         shortest_paths_to_forwarding_table(my_node);
         print_forwarding_table(my_node);
     }
-    else if(isMessage(buffer)){
+    else if(isMessage(buffer, my_node)){
         char dest[3]="", message[128]="";
         sscanf(buffer, "%*s %s %s", dest, message);
         send_chat_instruction(my_node, my_node->own_id, dest, message);
     }
     else{
-        printf("Your input is not an available function\n");
+        printf("Your input is wrong or is not an available function\n");
         printf("Please type out a function with the formatting shown above\n\n");
         return;
     }
