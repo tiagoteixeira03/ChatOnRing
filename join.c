@@ -55,6 +55,13 @@ void join(char *regIP, char *regUDP, t_node_info *my_node){
     struct addrinfo hints, *res;
     char buffer_in[BUFFERSIZE] = "REG ", buffer_out[BUFFERSIZE], node_info[10] = "NODES ", nodes_list[512]="", *token, id_check[16], nodes_list_buffer[512]="";
 
+    fd_set rfds;
+    struct timeval tout;
+    int counter;
+
+    tout.tv_sec = 2;
+    tout.tv_usec = 0;
+
     for(int i=0; i<100; i++){
         used_ids[i] = 0;
     }
@@ -74,12 +81,27 @@ void join(char *regIP, char *regUDP, t_node_info *my_node){
     n=sendto(my_node->udp_client_fd, node_info, strlen(node_info), 0, res->ai_addr, res->ai_addrlen);
     if(n==-1) /*error*/ exit(1);
 
-    addrlen=sizeof(addr);
-    n=recvfrom(my_node->udp_client_fd, nodes_list, 128, 0, (struct sockaddr*)&addr, &addrlen);
-    if(n==-1) /*error*/ exit(1);
+    FD_ZERO(&rfds);
+    FD_SET(my_node->udp_client_fd, &rfds);
+
+    counter = select(my_node->udp_client_fd + 1, &rfds, NULL, NULL, &tout);
+
+    if(counter == -1){
+        perror("select do UDP");
+        exit(EXIT_FAILURE);
+    }
+    else if(counter > 0){ /*UDP Server answered in less than 2 seconds*/
+        addrlen=sizeof(addr);
+        n=recvfrom(my_node->udp_client_fd, nodes_list, 512, 0, (struct sockaddr*)&addr, &addrlen);
+        if(n==-1) /*error*/ exit(1);
+    }
+    else{
+        freeaddrinfo(res);
+        printf("Node Server took more than 2 seconds to answer\n");
+        return;
+    }
 
     strcpy(nodes_list_buffer, nodes_list);
-
 
     token = strtok(nodes_list, "\n");
     while(token != NULL){
@@ -122,9 +144,25 @@ void join(char *regIP, char *regUDP, t_node_info *my_node){
     
     if(n==-1) /*error*/ exit(1);
 
-    addrlen=sizeof(addr);
-    n=recvfrom(my_node->udp_client_fd,buffer_out,128,0,(struct sockaddr*)&addr,&addrlen);
-    if(n==-1) /*error*/ exit(1);
+    FD_ZERO(&rfds);
+    FD_SET(my_node->udp_client_fd, &rfds);
+
+    counter = select(my_node->udp_client_fd + 1, &rfds, NULL, NULL, &tout);
+
+    if(counter == -1){
+        perror("Erro no select do UDP");
+        exit(EXIT_FAILURE);
+    }
+    else if(counter > 0){ /*UDP Server answered in less than 2 seconds*/
+        addrlen=sizeof(addr);
+        n=recvfrom(my_node->udp_client_fd,buffer_out,128,0,(struct sockaddr*)&addr,&addrlen);
+        if(n==-1) /*error*/ exit(1);
+    }
+    else{ /*UDP Server took more than 2 seconds to answer*/
+        freeaddrinfo(res);
+        printf("Node Server took more than 2 seconds to answer\n");
+        return;
+    }
 
     if(strncmp(buffer_out, "OKREG", 5) == 0){
         printf("Node %s has been successfully added to ring %s\n\n", my_node->own_id, my_node->ring_id);
@@ -133,6 +171,9 @@ void join(char *regIP, char *regUDP, t_node_info *my_node){
     else{
         printf("There was a problem connecting with the node server\n\n");
         printf("Please type out a function with the formatting shown above\n\n");
+    }
+    if(strcmp(my_node->pred_id, my_node->succ_id) == 0 && strcmp(my_node->succ_id, my_node->sec_suc_id)){
+        routing_table_init(my_node);
     }
     freeaddrinfo(res);
 }
