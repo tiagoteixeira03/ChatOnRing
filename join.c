@@ -17,7 +17,7 @@
 
 #define BUFFERSIZE 128
 
-bool isIdUsed(int id, int* used_ids, int n) {
+bool isIdUsed(int id, int used_ids[16], int n) {
     for (int i = 0; i < n; ++i) {
         if (used_ids[i] == id) {
             return true;
@@ -54,6 +54,10 @@ void join(char *regIP, char *regUDP, t_node_info *my_node){
     struct sockaddr_in addr;
     struct addrinfo hints, *res;
     char buffer_in[BUFFERSIZE] = "REG ", buffer_out[BUFFERSIZE], node_info[10] = "NODES ", nodes_list[512]="", *token, id_check[16], nodes_list_buffer[512]="";
+
+    for(int i=0; i<100; i++){
+        used_ids[i] = 0;
+    }
 
     memset(&hints,0,sizeof hints);
 
@@ -130,4 +134,5 @@ void join(char *regIP, char *regUDP, t_node_info *my_node){
         printf("There was a problem connecting with the node server\n\n");
         printf("Please type out a function with the formatting shown above\n\n");
     }
+    freeaddrinfo(res);
 }

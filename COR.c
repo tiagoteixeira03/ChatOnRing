@@ -28,6 +28,7 @@ int main(int argc, char* argv[]){
     reset_tables(my_node);
 
     my_node->succ_fd=0;
+    my_node->pred_fd=0;
     my_node->node_just_left=0;
 
     process_user_arguments(argc, argv, &regIP, &regUDP, my_node);
@@ -36,13 +37,13 @@ int main(int argc, char* argv[]){
     my_node->udp_client_fd = create_udp_client_fd();
     my_node->tcp_server_fd = create_tcp_server_fd(my_node);
 
-    max_fd = MAX(my_node->udp_client_fd, my_node->succ_fd);
-    max_fd = MAX(max_fd, my_node->pred_fd);
-    max_fd = MAX(max_fd, my_node->tcp_server_fd);
-
     printf("Please type out a function with the formatting shown above\n\n");
 
     while(1){
+        max_fd = 0;
+        max_fd = MAX(my_node->udp_client_fd, my_node->succ_fd);
+        max_fd = MAX(max_fd, my_node->pred_fd);
+        max_fd = MAX(max_fd, my_node->tcp_server_fd);
         max_fd = MAX(max_fd, my_node->succ_fd);
         max_fd = MAX(max_fd, my_node->pred_fd);
         FD_ZERO(&ready_sockets); /*Remove all descriptors*/
