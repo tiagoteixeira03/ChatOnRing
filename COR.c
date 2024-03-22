@@ -50,8 +50,12 @@ int main(int argc, char* argv[]){
         FD_SET(0, &ready_sockets); /*add descriptor 0 (stdin)*/
         FD_SET(my_node->udp_client_fd, &ready_sockets); /*add descriptor udp_client_fd*/
         FD_SET(my_node->tcp_server_fd, &ready_sockets); /*add descriptor tcp_server_fd*/
-        FD_SET(my_node->succ_fd, &ready_sockets); /*add descriptor succ_fd*/
-        FD_SET(my_node->pred_fd, &ready_sockets); /*add descriptor pred_fd*/
+        if(my_node->succ_fd>0){
+            FD_SET(my_node->succ_fd, &ready_sockets); /*add descriptor succ_fd*/
+        }
+        if(my_node->pred_fd>0){
+            FD_SET(my_node->pred_fd, &ready_sockets); /*add descriptor pred_fd*/
+        }
 
         if(select(max_fd+1, &ready_sockets, NULL, NULL, NULL) < 0){
             perror("select error");

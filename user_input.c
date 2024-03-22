@@ -14,7 +14,7 @@
 #define BUFFERSIZE 128
 
 int isFunction(char *abbreviated_function, char *function, char *buffer){
-    char first_word[64], second_word[64], first_nd_second[128]="";
+    char first_word[64]="", second_word[64]="", first_nd_second[128]="";
 
     sscanf(buffer, "%s %s", first_word, second_word);
 
@@ -218,6 +218,7 @@ void function_selector(char *buffer, char *regIP, char *regUDP, t_node_info *my_
         free(regIP);
         free(regUDP);
         free(my_node);
+        free(buffer);
         exit(0);
     }
     else if(isDirectjoin(buffer, my_node)){
