@@ -98,6 +98,7 @@ void join(char *regIP, char *regUDP, t_node_info *my_node){
     else{
         freeaddrinfo(res);
         printf("Node Server took more than 2 seconds to answer\n");
+        printf("Please type out a function with the formatting shown above\n\n");
         return;
     }
 
@@ -161,6 +162,7 @@ void join(char *regIP, char *regUDP, t_node_info *my_node){
     else{ /*UDP Server took more than 2 seconds to answer*/
         freeaddrinfo(res);
         printf("Node Server took more than 2 seconds to answer\n");
+        printf("Please type out a function with the formatting shown above\n\n");
         return;
     }
 

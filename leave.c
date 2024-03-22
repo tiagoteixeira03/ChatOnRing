@@ -78,6 +78,7 @@ void leave(char *regIP, char *regUDP, t_node_info *my_node){
     }
     else{
         printf("Node Server took more than 2 seconds to answer\n");
+        printf("Please type out a function with the formatting shown above\n\n");
     }
 
     freeaddrinfo(res);
