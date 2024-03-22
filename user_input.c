@@ -9,6 +9,7 @@
 #include "handle_messages.h"
 #include "routing_layer.h"
 #include "message.h"
+#include "user_options.h"
 
 #define BUFFERSIZE 128
 
@@ -42,11 +43,11 @@ int isJoin(char *buffer, t_node_info *my_node){
             strcpy(my_node->pred_id, my_node->own_id);
             strcpy(my_node->succ_id, my_node->own_id);
             strcpy(my_node->sec_suc_id, my_node->own_id); 
-            if(atoi(my_node->ring_id)>999){
-                printf("Ring id cant excede 3 digits\n");
+            if(strlen(my_node->ring_id) != 3 || (atoi(my_node->ring_id) <= 0 && strcmp(my_node->ring_id, "000")!=0) || atoi(my_node->ring_id) > 999){
+                printf("Ring ID is wrong\n");
             }
-            else if(atoi(my_node->own_id)>99){
-                printf("Your own id cant excede 2 digits\n");
+            else if(atoi(my_node->own_id)>99 || atoi(my_node->own_id) < 0 || strlen(my_node->own_id) != 2){
+                printf("Own ID is wrong\n");
             }
             else{
                 return 1; /*join in abbreviated or long form is correct*/
@@ -107,21 +108,21 @@ int isDirectjoin(char *buffer, t_node_info *my_node){
 
         if((result == 1 && sscanf(buffer, "%*s %s %s %s %s", my_node->own_id, my_node->succ_id, my_node->succ_IP, my_node->succ_port) == 4)
          || (result == 2 && sscanf(buffer, "%*s %*s %s %s %s %s", my_node->own_id, my_node->succ_id, my_node->succ_IP, my_node->succ_port) == 4)){
-            if(strlen(my_node->own_id) != 2){
-                printf("%s is not a permitted id\n", my_node->own_id);
-                exit(1);
+            if(atoi(my_node->own_id)>99 || atoi(my_node->own_id) < 0 || strlen(my_node->own_id) != 2){
+                printf("%s is not a valid ID\n", my_node->own_id);
+                return 0;
             }
-            else if(strlen(my_node->succ_id) != 2){
-                printf("%s is not a permitted id\n", my_node->succ_id);
-                exit(1);
+            else if(atoi(my_node->succ_id)>99 || atoi(my_node->succ_id) < 0 || strlen(my_node->succ_id) != 2){
+                printf("%s is not a valid ID\n", my_node->succ_id);
+                return 0;
             }
-            else if(strlen(my_node->succ_IP) != 9 && strlen(my_node->succ_IP) != 13){
+            else if(countDots(my_node->succ_IP) == -1 && countDots(my_node->succ_IP) != 3){
                 printf("%s is not a permitted ip\n", my_node->succ_IP);
-                exit(1);
+                return 0;
             }
-            else if(strlen(my_node->succ_port) != 5){
+            else if(atoi(my_node->succ_port) > 65535 || atoi(my_node->succ_port) < 49152){
                 printf("%s is not a permitted port\n", my_node->succ_port);
-                exit(1);
+                return 0;
             }
             return 1; /*Direct join is correct*/
         }
@@ -154,7 +155,7 @@ char *isShowPath(char *buffer){
     else{
         return "error";
     }
-}
+}   
 
 int isShowForwarding(char *buffer){
     int result;
@@ -177,7 +178,7 @@ int isMessage(char *buffer, t_node_info *my_node){
 
     if(result == 1 || result == 2){
         if(sscanf(buffer, "%*s %s %s", dest, message) == 2){
-            if(atoi(dest)>99 || atoi(dest)<0){
+            if(atoi(dest)>99 || atoi(dest) < 0 || strlen(dest) != 2){
                 printf("Destination node id must be in between 0 and 99\n");
                 return 0;
             }
