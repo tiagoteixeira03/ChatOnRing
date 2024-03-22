@@ -198,14 +198,16 @@ void send_route_messages(t_node_info *my_node, char buffer[512]){
 
 
 void write_route_messages(t_node_info *my_node, char *leaving_node){
-    char buffer[512]="";
+    char buffer[512]="", *converted_number=NULL;
 
     for(int i=0; i<100; i++){
         if(strcmp(my_node->shortest_paths_table[i], "-")!=0){
             strcat(buffer, "ROUTE ");
             strcat(buffer, my_node->own_id);
             strcat(buffer, " ");
+            converted_number = convert_single_digit_numbers(i); 
             strcat(buffer, convert_single_digit_numbers(i));
+            free(converted_number);
             strcat(buffer, " ");
             strcat(buffer, my_node->shortest_paths_table[i]);
             strcat(buffer, "\n");
