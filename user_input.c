@@ -131,7 +131,7 @@ int isDirectjoin(char *buffer, t_node_info *my_node){
 
 char *isShowRouting(char *buffer){
     int result;
-    char *dest = (char*)malloc(3*sizeof(char));
+    char *dest = (char*)malloc(6*sizeof(char));
 
     result = isFunction("sr", "show routing", buffer);
 
@@ -139,13 +139,14 @@ char *isShowRouting(char *buffer){
         return dest;
     }
     else{
-        return "error";
+        strcpy(dest, "error");
+        return dest;
     }
 }
 
 char *isShowPath(char *buffer){
     int result;
-    char *dest = (char*)malloc(3*sizeof(char));
+    char *dest = (char*)malloc(6*sizeof(char));
 
     result = isFunction("sp", "show path", buffer);
 
@@ -153,7 +154,8 @@ char *isShowPath(char *buffer){
         return dest;
     }
     else{
-        return "error";
+        strcpy(dest, "error");
+        return dest;
     }
 }   
 
@@ -194,7 +196,7 @@ int isMessage(char *buffer, t_node_info *my_node){
 
 void function_selector(char *buffer, char *regIP, char *regUDP, t_node_info *my_node){
     static int on_node = 0;
-    char *dest_sr=NULL, *dest_sp=NULL;
+    char *dest=NULL;
 
     if (isJoin(buffer, my_node)){
         join(regIP, regUDP, my_node);
@@ -241,10 +243,10 @@ void function_selector(char *buffer, char *regIP, char *regUDP, t_node_info *my_
         printf("Please type out a function with the formatting shown above\n\n");
     }
     else{
-        dest_sr = isShowRouting(buffer);
-        if(strcmp(dest_sr, "error") != 0){
-            if((strlen(dest_sr)!=2) == (strcmp(dest_sr, "all")!=0)){
-                printf("%s is not a valid destination id\n", dest_sr);
+        dest = isShowRouting(buffer);
+        if(strcmp(dest, "error") != 0){
+            if((strlen(dest)!=2) == (strcmp(dest, "all")!=0)){
+                printf("%s is not a valid destination id\n", dest);
                 printf("Please type out a function with the formatting shown above\n\n");
                 return;
             }
@@ -254,13 +256,13 @@ void function_selector(char *buffer, char *regIP, char *regUDP, t_node_info *my_
             }
         }
         else{
-            dest_sp = isShowPath(buffer);
-            if(strcmp(dest_sp, "error") != 0){
-                if((strlen(dest_sp)!=2) == (strcmp(dest_sp, "all")!=0)){
-                    printf("%s is not a valid destination id\n", dest_sp);
+            dest = isShowPath(buffer);
+            if(strcmp(dest, "error") != 0){
+                if((strlen(dest)!=2) == (strcmp(dest, "all")!=0)){
+                    printf("%s is not a valid destination id\n", dest);
                 }
                 else{
-                    print_shortest_path(my_node, dest_sp);
+                    print_shortest_path(my_node, dest);
                     printf("Please type out a function with the formatting shown above\n\n");
                 }
             }
@@ -280,8 +282,9 @@ void function_selector(char *buffer, char *regIP, char *regUDP, t_node_info *my_
             }
         }
     }
-    free(dest_sp);
-    free(dest_sr);
+    if(dest != NULL){
+        free(dest);
+    }
     return;
 }
 
