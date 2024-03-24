@@ -37,8 +37,6 @@ int main(int argc, char* argv[]){
     my_node->udp_client_fd = create_udp_client_fd();
     my_node->tcp_server_fd = create_tcp_server_fd(my_node);
 
-    printf("Please type out a function with the formatting shown above\n\n");
-
     while(1){
         max_fd = 0;
         max_fd = MAX(my_node->udp_client_fd, my_node->succ_fd);

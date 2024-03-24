@@ -17,7 +17,7 @@
 
 #define BUFFERSIZE 128
 
-bool isIdUsed(int id, int used_ids[16], int n) {
+bool isIdUsed(int id, int* used_ids, int n) {
     for (int i = 0; i < n; ++i) {
         if (used_ids[i] == id) {
             return true;
@@ -97,8 +97,7 @@ void join(char *regIP, char *regUDP, t_node_info *my_node){
     }
     else{
         freeaddrinfo(res);
-        printf("Node Server took more than 2 seconds to answer\n");
-        printf("Please type out a function with the formatting shown above\n\n");
+        printf("Node Server took more than 2 seconds to answer\n\n");
         return;
     }
 
@@ -118,13 +117,13 @@ void join(char *regIP, char *regUDP, t_node_info *my_node){
     }
 
     if(isIdUsed(atoi(my_node->own_id), used_ids, nodeslist_lines)){
-        printf("The ID %s is already used\n", my_node->own_id);
+        printf("The ID %s is already used\n\n", my_node->own_id);
 
         int new_id = generateNewId(used_ids, nodeslist_lines);
 
         strcpy(my_node->own_id, convert_single_digit_numbers(new_id));
 
-        printf("Your new ID is %s\n", my_node->own_id);
+        printf("Your new ID is %s\n\n", my_node->own_id);
     }
 
     sscanf(nodes_list_buffer, "%*s %*s %s %s %s", my_node->succ_id, my_node->succ_IP, my_node->succ_port);
@@ -161,18 +160,15 @@ void join(char *regIP, char *regUDP, t_node_info *my_node){
     }
     else{ /*UDP Server took more than 2 seconds to answer*/
         freeaddrinfo(res);
-        printf("Node Server took more than 2 seconds to answer\n");
-        printf("Please type out a function with the formatting shown above\n\n");
+        printf("Node Server took more than 2 seconds to answer\n\n");
         return;
     }
 
     if(strncmp(buffer_out, "OKREG", 5) == 0){
         printf("Node %s has been successfully added to ring %s\n\n", my_node->own_id, my_node->ring_id);
-        printf("Please type out a function with the formatting shown above\n\n");
     }
     else{
         printf("There was a problem connecting with the node server\n\n");
-        printf("Please type out a function with the formatting shown above\n\n");
     }
     if(strcmp(my_node->pred_id, my_node->succ_id) == 0 && strcmp(my_node->succ_id, my_node->sec_suc_id)){
         routing_table_init(my_node);

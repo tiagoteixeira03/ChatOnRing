@@ -25,19 +25,19 @@ void process_user_arguments(int argc, char *argv[], char **regIP, char **regUDP,
     int dotsCount = 0;
   
     if(argc < 3 || argc > 5){
-        printf("Invalid arguments, correct usage is:\n./COR IP TCP regIP regUDP or ./COR IP TCP\n");
+        printf("Invalid arguments, correct usage is:\n./COR IP TCP regIP regUDP or ./COR IP TCP\n\n");
         exit(1);
     }
 
     dotsCount = countDots(argv[1]);
 
     if (dotsCount == -1 || dotsCount != 3){
-        printf("Invalid IP adress\n");
+        printf("Invalid IP adress\n\n");
         exit(1);
     }
 
     if (atoi(argv[2]) > 65535 || atoi(argv[2]) < 49152){
-        printf("Invalid port number\n");
+        printf("Invalid port number\n\n");
         exit(1);
     }
 
@@ -62,7 +62,7 @@ void process_user_arguments(int argc, char *argv[], char **regIP, char **regUDP,
            strcpy(*regIP, argv[3]); 
         }
         else{
-            printf("Invalid regIP or regUDP values\n");
+            printf("Invalid regIP or regUDP values\n\n");
             exit(1);
         }
     }

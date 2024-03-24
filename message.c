@@ -43,13 +43,13 @@ void receive_chat_instruction(t_node_info *my_node, char chat_instruction[512]){
 
     if(sscanf(chat_instruction, "%*s %s %s %s", origin, dest, message) == 3){
         if(strcmp(dest, my_node->own_id) == 0){
-            printf("Message from node %s:\n%s\n", origin, message);
+            printf("Message from node %s:\n%s\n\n", origin, message);
         }
         else{
             send_chat_instruction(my_node, origin, dest, message);
         }
     }
     else{
-        printf("Received a CHAT instruction that is incorrectly formatted\n");
+        printf("Received a CHAT instruction that is incorrectly formatted\n\n");
     }
 }

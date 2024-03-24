@@ -44,10 +44,10 @@ int isJoin(char *buffer, t_node_info *my_node){
             strcpy(my_node->succ_id, my_node->own_id);
             strcpy(my_node->sec_suc_id, my_node->own_id); 
             if(strlen(my_node->ring_id) != 3 || (atoi(my_node->ring_id) <= 0 && strcmp(my_node->ring_id, "000")!=0) || atoi(my_node->ring_id) > 999){
-                printf("Ring ID is wrong\n");
+                printf("Ring ID is wrong\n\n");
             }
             else if(atoi(my_node->own_id)>99 || atoi(my_node->own_id) < 0 || strlen(my_node->own_id) != 2){
-                printf("Own ID is wrong\n");
+                printf("Own ID is wrong\n\n");
             }
             else{
                 return 1; /*join in abbreviated or long form is correct*/
@@ -64,14 +64,14 @@ int isLeave(char *buffer){
 
     if(result == 1){
         if(buffer[1] != '\0'){
-            printf("Wrong formatting of function leave\n");
+            printf("Wrong formatting of function leave\n\n");
             return 0;
         }
         return 1; /*leave on short form is correct*/
     }
     else if(result == 2){
         if(buffer[6] != '\0'){
-            printf("Wrong formatting of function leave\n");
+            printf("Wrong formatting of function leave\n\n");
             return 0;
         }
         return 1; /*leave on long form is correct*/
@@ -86,14 +86,14 @@ int isExit(char *buffer){
 
     if(result == 1){
         if(buffer[1] != '\0'){
-            printf("Wrong formatting of function exit\n");
+            printf("Wrong formatting of function exit\n\n");
             return 0;
         }
         return 1; /*exit on short form is correct*/
     }
     else if(result == 2){
         if(buffer[5] != '\0'){
-            printf("Wrong formatting of function exit\n");
+            printf("Wrong formatting of function exit\n\n");
             return 0;
         }
         return 1; /*exit on long form is correct*/
@@ -109,19 +109,19 @@ int isDirectjoin(char *buffer, t_node_info *my_node){
         if((result == 1 && sscanf(buffer, "%*s %s %s %s %s", my_node->own_id, my_node->succ_id, my_node->succ_IP, my_node->succ_port) == 4)
          || (result == 2 && sscanf(buffer, "%*s %*s %s %s %s %s", my_node->own_id, my_node->succ_id, my_node->succ_IP, my_node->succ_port) == 4)){
             if(atoi(my_node->own_id)>99 || atoi(my_node->own_id) < 0 || strlen(my_node->own_id) != 2){
-                printf("%s is not a valid ID\n", my_node->own_id);
+                printf("%s is not a valid ID\n\n", my_node->own_id);
                 return 0;
             }
             else if(atoi(my_node->succ_id)>99 || atoi(my_node->succ_id) < 0 || strlen(my_node->succ_id) != 2){
-                printf("%s is not a valid ID\n", my_node->succ_id);
+                printf("%s is not a valid ID\n\n", my_node->succ_id);
                 return 0;
             }
             else if(countDots(my_node->succ_IP) == -1 && countDots(my_node->succ_IP) != 3){
-                printf("%s is not a permitted ip\n", my_node->succ_IP);
+                printf("%s is not a permitted ip\n\n", my_node->succ_IP);
                 return 0;
             }
             else if(atoi(my_node->succ_port) > 65535 || atoi(my_node->succ_port) < 49152){
-                printf("%s is not a permitted port\n", my_node->succ_port);
+                printf("%s is not a permitted port\n\n", my_node->succ_port);
                 return 0;
             }
             return 1; /*Direct join is correct*/
@@ -181,11 +181,11 @@ int isMessage(char *buffer, t_node_info *my_node){
     if(result == 1 || result == 2){
         if(sscanf(buffer, "%*s %s %s", dest, message) == 2){
             if(atoi(dest)>99 || atoi(dest) < 0 || strlen(dest) != 2){
-                printf("Destination node id must be in between 0 and 99\n");
+                printf("Destination node id must be in between 0 and 99\n\n");
                 return 0;
             }
             if(strcmp(dest, my_node->own_id)==0){
-                printf("You can't message your own id\n");
+                printf("You can't message your own id\n\n");
                 return 0;
             }
             return 1;
@@ -204,17 +204,15 @@ void function_selector(char *buffer, char *regIP, char *regUDP, t_node_info *my_
     }
     else if(isLeave(buffer)){
         if(on_node == 0){
-            printf("You aren't currently connected to a node, use the command join to do so\n");
-            printf("Please type out a function with the formatting shown above\n\n");
+            printf("You aren't currently connected to a node, use the command join to do so\n\n");
         }
         else{
             leave(regIP, regUDP, my_node);
             on_node = 0;
-            printf("Please type out a function with the formatting shown above\n\n");
         }
     }
     else if(isExit(buffer)){
-        printf("Thank you for using this chatting app\n");
+        printf("Thank you for using this chatting app\n\n");
         free(regIP);
         free(regUDP);
         free(my_node);
@@ -224,14 +222,12 @@ void function_selector(char *buffer, char *regIP, char *regUDP, t_node_info *my_
     else if(isDirectjoin(buffer, my_node)){
         //If the node id, IP and port art the same we create a node
         if((atoi(my_node->own_id) == atoi(my_node->succ_id)) && (strcmp(my_node->own_IP, my_node->succ_IP)==0) && strcmp(my_node->own_port, my_node->succ_port)==0){
-            printf("Created a ring for this node\n");
+            printf("Created a ring for this node\n\n");
             strcpy(my_node->sec_suc_id,my_node->own_id);
-            printf("Please type out a function with the formatting shown above\n\n");
             return;
         }
         else{
             join_node(my_node);
-            printf("Please type out a function with the formatting shown above\n\n");
         }
     }
     else if(isFunction("st", "show topology", buffer)){
@@ -241,30 +237,30 @@ void function_selector(char *buffer, char *regIP, char *regUDP, t_node_info *my_
         printf("Sucessor id: %s, Sucessor IP: %s, Sucessor port: %s\n", my_node->succ_id, my_node->succ_IP, my_node->succ_port);
         printf("Second Sucessor id: %s, Second Sucessor IP: %s, Second Sucessor port: %s\n", my_node->sec_suc_id, my_node->sec_suc_IP, my_node->sec_suc_port);
         printf("Predecessor id: %s\n\n", my_node->pred_id);
-        printf("Please type out a function with the formatting shown above\n\n");
     }
     else{
         dest = isShowRouting(buffer);
         if(strcmp(dest, "error") != 0){
             if((strlen(dest)!=2) == (strcmp(dest, "all")!=0)){
-                printf("%s is not a valid destination id\n", dest);
-                printf("Please type out a function with the formatting shown above\n\n");
+                printf("%s is not a valid destination id\n\n", dest);
                 return;
             }
             else{
-                print_routing_table(my_node, isShowRouting(buffer));
-                printf("Please type out a function with the formatting shown above\n\n");
+                print_routing_table(my_node, dest);
             }
         }
         else{
+            if(dest != NULL){
+                free(dest);
+                dest = NULL;
+            }
             dest = isShowPath(buffer);
             if(strcmp(dest, "error") != 0){
                 if((strlen(dest)!=2) == (strcmp(dest, "all")!=0)){
-                    printf("%s is not a valid destination id\n", dest);
+                    printf("%s is not a valid destination id\n\n", dest);
                 }
                 else{
                     print_shortest_path(my_node, dest);
-                    printf("Please type out a function with the formatting shown above\n\n");
                 }
             }
             else if(isShowForwarding(buffer)){
@@ -277,8 +273,6 @@ void function_selector(char *buffer, char *regIP, char *regUDP, t_node_info *my_
                 send_chat_instruction(my_node, my_node->own_id, dest, message);
             }
             else{
-                printf("Your input is wrong or is not an available function\n");
-                printf("Please type out a function with the formatting shown above\n\n");
                 return;
             }
         }
