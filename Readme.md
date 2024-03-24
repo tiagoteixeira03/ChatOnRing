@@ -1,4 +1,3 @@
-```markdown
 # ChatOnRing Project
 
 Welcome to the ChatOnRing project repository! This project is a chat application developed as part of the Computer Networks and Internet course. Below you will find information on how to use and showcase this project.
@@ -30,4 +29,3 @@ To use the ChatOnRing application, follow these steps:
 - Directly join a specific node in the network.
 - View the current network topology and routing layers.
 - Send messages to other nodes in the network.
-```
