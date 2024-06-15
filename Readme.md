@@ -1,5 +1,5 @@
 # ChatOnRing Project
-ChatOnRing is a chat application based on a ring network structure developed as part of the Computer Networks and Internet course. It allows nodes to communicate within the network using TCP and UDP protocols. The application supports node registration, message exchange, and network visualization functionalities
+ChatOnRing is a chat application based on a ring network structure developed as part of the "[Computer Networks and Internet](https://fenix.tecnico.ulisboa.pt/disciplinas/RCI3/2023-2024/2-semestre)" course. It allows nodes to communicate within the network using TCP and UDP protocols. The application supports node registration, message exchange, and network visualization functionalities. For more information, please refer to [assignment.pdf](./assignment.pdf).
 
 ## Usage
 To use the ChatOnRing application, follow these steps:
